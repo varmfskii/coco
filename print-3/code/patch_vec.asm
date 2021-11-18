@@ -22,5 +22,4 @@ vectors:
 	fdb RVEC1,ovec1,rvec1_3
 	fdb RVEC2,ovec2,rvec2_3
 	fdb RVEC3,ovec3,rvec3_3
-	fdb RVEC6,ovec6,rvec6_3
 	fdb $0000

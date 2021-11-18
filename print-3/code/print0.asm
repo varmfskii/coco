@@ -10,6 +10,7 @@ print0:
 	stx $a347 ; memory location limit
 	leax -31,x ; beginning of last line
 	stx $a354 ; scroll limit
-	ldx #$0400
+	;; set cursor at top of screen
+	ldx #VIDRAM
 	stx CURPOS
 	rts

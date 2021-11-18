@@ -19,6 +19,5 @@ curpos3:
 	include "vector1.asm"
 	include "vector2.asm"
 	include "vector3.asm"
-	include "vector6.asm"
 	end start
 	

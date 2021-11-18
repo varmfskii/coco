@@ -1,0 +1,92 @@
+\documentclass{article}
+\usepackage{listings}
+\usepackage{hyperref}
+\title{PRINT\#-3}
+\author{Theodore (Alex) Evans}
+\begin{document}
+\maketitle
+
+Complete code for this can be found at: \url{https://github.com/varmfskii/coco/tree/main/print-3/code}
+
+In Extended Color BASIC, the supports devices -2 to 0 with -2 being
+the printer, -1 the cassette, and 0 being the basic text screen. With
+Disk BASIC we have devices 1-15 being available has handles to open
+files on the disk drive. On the CoCo 3 this didn't change other than
+device 0 getting a set of three modes (WIDTH 32, 40, and 80) to
+support the old and new text modes. There have been various things
+done to repurpose some of these devices, most notably allowing text
+display on the PMODE 4 screen to allow 53, 64, or 85 column text.
+
+I am doing something a little different. I am adding device number -3
+to support a new serial channel. The method is demonstrative, and not
+particularly practical, though someone may find a use for the
+particular case. Some potential uses for this could be an easy way to
+simultaneously use the second display provided by hardware like the
+Wordpak 2+ or SuperSprite FM+ which still having easy access to the
+original text screen.
+
+There are two common ways to modify/extend the Coco's BASIC. You can
+patch the 25 vectors that run through addresses \$015E to \$01A8 or,
+on a machine with 64k or more RAM, directly patch BASIC. I will do a
+combination of the two.
+
+For all of the vector code.
+If we have device -3:
+\begin{itemize}
+\item Remove one return address from the stack to inhibit BASIC's
+  handling of the vector.
+\item Perform our processing for device -3
+\item Return
+\end{itemize}
+If not device -3 we call the original code.
+
+Things to do:
+\begin{itemize}
+\item Change device 0 to not use all of screen.
+\item Validate device number:  RVEC1
+\item Set print parameters: RVEC2
+\item Console out: RVEC3
+\end{itemize}
+
+\section{Modify device 0}
+Change device 0 to not use all of screen: Printing on device 0 uses a
+routing for PRINT@ which has no hook, so for this part we are going to
+modify BASIC directly. We are patching where the screen ends.
+
+To do this first make sure the machine is in all RAM mode with the
+contents of the ROMS copied to ram.
+
+\lstinputlisting{../code/allram.asm}
+
+Then perform the actual patches.
+
+\lstinputlisting{../code/print0.asm}
+
+If we don't need to change the existing device, we can add our vectors
+without using all RAM mode. We also had the option of using some of
+the other vectors like the PRINT vector (RVEC9) and the CLS vector
+(RVEC22).
+
+\section{Valildate device number}
+Vector RVEC1 takes a value in the B register and either returns on
+success or calls the error handler on a failure. In our case we want
+to check for device -3, if we have it we return success otherwise we
+pass control to the original routine.
+
+\lstinputlisting{../code/vector1.asm}
+
+\section{Set print parameters}
+Vector RVEC2 checks what the current device is in DEVNUM and assigns
+the proper values to: DEVCFW (tab zone width), DEVLCF (beginning of
+last tab zone), DEVPOS (current column), and DEVWID (total number of
+columns)
+
+\lstinputlisting{../code/vector2.asm}
+
+\section{Console out}
+Vector RVEC3 takes the output character in register A and prints it to
+the selected device.
+
+\lstinputlisting{../code/vector3.asm}
+
+\end{document}
