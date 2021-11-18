@@ -60,11 +60,11 @@ modify BASIC directly. We are patching where the screen ends.
 To do this first make sure the machine is in all RAM mode with the
 contents of the ROMS copied to ram.
 
-\lstinputlisting[language={[Motorola6809]Assembler}]{../code/allram.asm}
+\lstinputlisting{../code/allram.asm}
 
 Then perform the actual patches.
 
-\lstinputlisting[language={[Motorola6809]Assembler}]{../code/print0.asm}
+\lstinputlisting{../code/print0.asm}
 
 If we don't need to change the existing device, we can add our vectors
 without using all RAM mode. We also had the option of using some of
@@ -76,8 +76,9 @@ Vector RVEC1 takes a value in the B register and either returns on
 success or calls the error handler on a failure. In our case we want
 to check for device -3, if we have it we return success otherwise we
 pass control to the original routine.
+exrepl st
 
-\lstinputlisting[language={[Motorola6809]Assembler}]{../code/vector1.asm}
+\lstinputlisting{../code/vector1.asm}
 
 \section{Set print parameters}
 Vector RVEC2 checks what the current device is in DEVNUM and assigns
@@ -85,12 +86,12 @@ the proper values to: DEVCFW (tab zone width), DEVLCF (beginning of
 last tab zone), DEVPOS (current column), and DEVWID (total number of
 columns)
 
-\lstinputlisting[language={[Motorola6809]Assembler}]{../code/vector2.asm}
+\lstinputlisting{../code/vector2.asm}
 
 \section{Console out}
 Vector RVEC3 takes the output character in register A and prints it to
 the selected device.
 
-\lstinputlisting[language={[Motorola6809]Assembler}]{../code/vector3.asm}
+\lstinputlisting{../code/vector3.asm}
 
 \end{document}
