@@ -1,7 +1,7 @@
 DEVCFW:	equ $006a		; tab zone field width
-DEVLCF:	equ $006a		; last tab position
-DEVPOS:	equ $006b		; print position (column)
-DEVWID:	equ $006c		; print width
+DEVLCF:	equ $006b		; last tab position
+DEVPOS:	equ $006c		; print position (column)
+DEVWID:	equ $006d		; print width
 PRTDEV:	equ $006e		; print device (-1 cassette/0 not cassette)
 DEVNUM:	equ $006f		; device number
 CURPOS:	equ $0088		; current position for device 0

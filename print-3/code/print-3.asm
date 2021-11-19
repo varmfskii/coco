@@ -9,7 +9,7 @@ start:
 	include "print0.asm"
 	include "patch_vec.asm"
 	ifdef ADV
-	org $7e70
+	org $7e90
 	else
 	org $7f50
 	endc

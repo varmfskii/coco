@@ -33,28 +33,16 @@ ucase:
 	anda #$3f
 wrtchr:
 	sta ,x+
+may_scroll:	
 	cmpx #scrstt+rows*cols
 	beq scroll
 save:
 	stx curpos3
 exit:
-nul:	
 	puls a,b,x,pc
 lcase:
 	suba #$20
 	bra wrtchr
-
-cr:	
-	tfr x,d
-	andb #cols-1
-	beq scroll
-	negb
-	addb #cols
-	lda #space
-cr_lp:
-	sta ,x+
-	decb
-	bne cr_lp
 	
 scroll:
 	ldx #scrstt
@@ -71,6 +59,19 @@ lp2@:
 	cmpb #cols
 	bne lp2@
 	bra save
+
+cr:
+	ldx curpos3
+	tfr x,d
+	andb #cols-1
+	negb
+	addb #cols
+	lda #space
+loop@:
+	sta ,x+
+	decb
+	bne loop@
+	bra may_scroll
 
 home:
 	ldx #scrstt
@@ -161,14 +162,16 @@ cls:
 loop@:
 	std ,x++
 	cmpx #scrstt+rows*cols
+nul:	
 	puls a,b,x,pc
 	
 cntl:
+	cmpa #$0d
+	lbeq cr
+	bhi nul
 	asla
 	leax ctltab,pcr
 	jmp [a,x]
 ctltab:
 	fdb nul,home,posn,erlin,erendl,nul,currt,nul
-	fdb curlt,curup,curdn,erends,cls,cr,nul,nul
-	fdb nul,nul,nul,nul,nul,nul,nul,nul
-	fdb nul,nul,nul,nul,nul,nul,nul,nul
+	fdb curlt,curup,curdn,erends,cls

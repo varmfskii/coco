@@ -4,7 +4,7 @@ rows:	equ 8
 cols:	equ 32
 scrstt:	equ $0500
 bs:	equ $08
-cr:	equ $13
+cr:	equ $0d
 space:	equ $20
 
 curpos3:
@@ -32,6 +32,7 @@ ucase:
 	anda #$3f
 wrtchr:
 	sta ,x+
+may_scroll:	
 	cmpx #scrstt+rows*cols
 	beq scroll
 save:
@@ -41,32 +42,6 @@ exit:
 lcase:
 	suba #$20
 	bra wrtchr
-cntl:	
-	cmpa #bs
-	bne not_bs
-
-is_bs:	
-	cmpx #scrstt
-	puls a,b,x,pc
-	lda #space
-	sta ,-x
-	bra save
-	
-not_bs:
-	cmpa #cr
-	bne not_cr
-
-is_cr:	
-	tfr x,d
-	andb #cols-1
-	beq scroll
-	negb
-	addb #cols
-	lda #space
-cr_lp:
-	sta ,x+
-	decb
-	bne cr_lp
 	
 scroll:
 	ldx #scrstt
@@ -83,6 +58,33 @@ lp2@:
 	cmpb #cols
 	bne lp2@
 	bra save
+
+cntl:
+	cmpa #bs
+	bne not_bs
+
+is_bs:	
+	cmpx #scrstt
+	beq exit
+	lda #space
+	sta ,-x
+	bra save
+	
+not_bs:
+	cmpa #cr
+	bne not_cr
+
+is_cr:
+	tfr x,d
+	andb #cols-1
+	negb
+	addb #cols
+	lda #space
+loop@:
+	sta ,x+
+	decb
+	bne loop@
+	bra may_scroll
 
 not_cr:
 	puls a,b,x,pc

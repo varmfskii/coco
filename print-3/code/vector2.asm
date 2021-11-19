@@ -13,11 +13,11 @@ cont@:
 	clr PRTDEV
 	;; a=current column
 	lda curpos3+1
-	anda #$1f
-	;; xhi=tab size, xlo=last tab column
-	ldx #$0818
+	anda #cols-1
 	;; b=number of columns
 	ldb #cols
-	stx DEVCFW
 	std DEVPOS
+	;; xhi=tab size, xlo=last tab column
+	ldx #$0818
+	stx DEVCFW
 	puls a,b,x,pc

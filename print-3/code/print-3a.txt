@@ -1,9 +1,9 @@
                       (      print-3.asm):00001                 org $7000
                       (      print-3.asm):00002                 include "decbdefs.asm"
      006A             (     decbdefs.asm):00001         DEVCFW: equ $006a               ; tab zone field width
-     006A             (     decbdefs.asm):00002         DEVLCF: equ $006a               ; last tab position
-     006B             (     decbdefs.asm):00003         DEVPOS: equ $006b               ; print position (column)
-     006C             (     decbdefs.asm):00004         DEVWID: equ $006c               ; print width
+     006B             (     decbdefs.asm):00002         DEVLCF: equ $006b               ; last tab position
+     006C             (     decbdefs.asm):00003         DEVPOS: equ $006c               ; print position (column)
+     006D             (     decbdefs.asm):00004         DEVWID: equ $006d               ; print width
      006E             (     decbdefs.asm):00005         PRTDEV: equ $006e               ; print device (-1 cassette/0 not cassette)
      006F             (     decbdefs.asm):00006         DEVNUM: equ $006f               ; device number
      0088             (     decbdefs.asm):00007         CURPOS: equ $0088               ; current position for device 0
@@ -110,51 +110,51 @@
 7075                  (    patch_vec.asm):00019         exit@:  
 7075 39               (    patch_vec.asm):00020                 rts
 7076                  (    patch_vec.asm):00021         vectors:
-7076 01617E7A7E70     (    patch_vec.asm):00022                 fdb RVEC1,ovec1,rvec1_3
-707C 01647E877E7D     (    patch_vec.asm):00023                 fdb RVEC2,ovec2,rvec2_3
-7082 01677EAD7EA3     (    patch_vec.asm):00024                 fdb RVEC3,ovec3,rvec3_3
+7076 01617E9A7E90     (    patch_vec.asm):00022                 fdb RVEC1,ovec1,rvec1_3
+707C 01647EA77E9D     (    patch_vec.asm):00023                 fdb RVEC2,ovec2,rvec2_3
+7082 01677ECD7EC3     (    patch_vec.asm):00024                 fdb RVEC3,ovec3,rvec3_3
 7088 0000             (    patch_vec.asm):00025                 fdb $0000
                       (      print-3.asm):00011                 ifdef ADV
-                      (      print-3.asm):00012                 org $7e70
+                      (      print-3.asm):00012                 org $7e90
                       (      print-3.asm):00013                 else
                       (      print-3.asm):00014                 org $7f50
                       (      print-3.asm):00015                 endc
                       (      print-3.asm):00016                 include "vector1.asm"
                       (      vector1.asm):00001                 
                       (      vector1.asm):00002                 ;; Validate device number
-7E70                  (      vector1.asm):00003         rvec1_3:
-7E70 3262             (      vector1.asm):00004                 leas 2,s
-7E72 39               (      vector1.asm):00005                 rts
-7E73 C1FD             (      vector1.asm):00006                 cmpb #-3
-7E75 2603             (      vector1.asm):00007                 bne ovec1
-7E77 3262             (      vector1.asm):00008                 leas 2,s
-7E79 39               (      vector1.asm):00009                 rts
-7E7A                  (      vector1.asm):00010         ovec1:  rmb 3
+7E90                  (      vector1.asm):00003         rvec1_3:
+7E90 3262             (      vector1.asm):00004                 leas 2,s
+7E92 39               (      vector1.asm):00005                 rts
+7E93 C1FD             (      vector1.asm):00006                 cmpb #-3
+7E95 2603             (      vector1.asm):00007                 bne ovec1
+7E97 3262             (      vector1.asm):00008                 leas 2,s
+7E99 39               (      vector1.asm):00009                 rts
+7E9A                  (      vector1.asm):00010         ovec1:  rmb 3
                       (      vector1.asm):00011         
                       (      print-3.asm):00017                 include "vector2.asm"
                       (      vector2.asm):00001                 
                       (      vector2.asm):00002                 ;; set print parameters
-7E7D                  (      vector2.asm):00003         rvec2_3:
-7E7D 3402             (      vector2.asm):00004                 pshs a                  ;
-7E7F 966F             (      vector2.asm):00005                 lda DEVNUM
-7E81 81FD             (      vector2.asm):00006                 cmpa #-3
-7E83 3502             (      vector2.asm):00007                 puls a
-7E85 2703             (      vector2.asm):00008                 beq cont@
-7E87                  (      vector2.asm):00009         ovec2:  rmb 3
-7E8A                  (      vector2.asm):00010         cont@:  
-7E8A 3262             (      vector2.asm):00011                 leas 2,s
-7E8C 3416             (      vector2.asm):00012                 pshs x,b,a
-7E8E 0F6E             (      vector2.asm):00013                 clr PRTDEV
+7E9D                  (      vector2.asm):00003         rvec2_3:
+7E9D 3402             (      vector2.asm):00004                 pshs a                  ;
+7E9F 966F             (      vector2.asm):00005                 lda DEVNUM
+7EA1 81FD             (      vector2.asm):00006                 cmpa #-3
+7EA3 3502             (      vector2.asm):00007                 puls a
+7EA5 2703             (      vector2.asm):00008                 beq cont@
+7EA7                  (      vector2.asm):00009         ovec2:  rmb 3
+7EAA                  (      vector2.asm):00010         cont@:  
+7EAA 3262             (      vector2.asm):00011                 leas 2,s
+7EAC 3416             (      vector2.asm):00012                 pshs x,b,a
+7EAE 0F6E             (      vector2.asm):00013                 clr PRTDEV
                       (      vector2.asm):00014                 ;; a=current column
-7E90 B67EA1           (      vector2.asm):00015                 lda curpos3+1
-7E93 841F             (      vector2.asm):00016                 anda #$1f
-                      (      vector2.asm):00017                 ;; xhi=tab size, xlo=last tab column
-7E95 8E0818           (      vector2.asm):00018                 ldx #$0818
-                      (      vector2.asm):00019                 ;; b=number of columns
-7E98 C620             (      vector2.asm):00020                 ldb #cols
-7E9A 9F6A             (      vector2.asm):00021                 stx DEVCFW
-7E9C DD6B             (      vector2.asm):00022                 std DEVPOS
-7E9E 3596             (      vector2.asm):00023                 puls a,b,x,pc
+7EB0 B67EC1           (      vector2.asm):00015                 lda curpos3+1
+7EB3 841F             (      vector2.asm):00016                 anda #cols-1
+                      (      vector2.asm):00017                 ;; b=number of columns
+7EB5 C620             (      vector2.asm):00018                 ldb #cols
+7EB7 DD6C             (      vector2.asm):00019                 std DEVPOS
+                      (      vector2.asm):00020                 ;; xhi=tab size, xlo=last tab column
+7EB9 8E0818           (      vector2.asm):00021                 ldx #$0818
+7EBC 9F6A             (      vector2.asm):00022                 stx DEVCFW
+7EBE 3596             (      vector2.asm):00023                 puls a,b,x,pc
                       (      print-3.asm):00018                 ifdef ADV
                       (      print-3.asm):00019                 include "vector3a.asm"
                       (     vector3a.asm):00001                 
@@ -164,177 +164,178 @@
      0500             (     vector3a.asm):00005         scrstt: equ $0500
      0020             (     vector3a.asm):00006         space:  equ $20
                       (     vector3a.asm):00007         
-7EA0                  (     vector3a.asm):00008         curpos3:
-7EA0 0500             (     vector3a.asm):00009                 fdb scrstt
-7EA2                  (     vector3a.asm):00010         xloc:   rmb 1
-7EA3                  (     vector3a.asm):00011         rvec3_3:
-7EA3 3402             (     vector3a.asm):00012                 pshs a
-7EA5 966F             (     vector3a.asm):00013                 lda DEVNUM
-7EA7 81FD             (     vector3a.asm):00014                 cmpa #-3
-7EA9 3502             (     vector3a.asm):00015                 puls a
-7EAB 2703             (     vector3a.asm):00016                 beq cont@
-7EAD                  (     vector3a.asm):00017         ovec3:  rmb 3
-7EB0                  (     vector3a.asm):00018         cont@:
-7EB0 3262             (     vector3a.asm):00019                 leas 2,s
-7EB2 3416             (     vector3a.asm):00020                 pshs x,b,a
-7EB4                  (     vector3a.asm):00021         branch: 
-7EB4 8120             (     vector3a.asm):00022                 cmpa #$20
-7EB6 102500F3         (     vector3a.asm):00023                 lblo cntl
-7EBA BE7EA0           (     vector3a.asm):00024                 ldx curpos3
-7EBD                  (     vector3a.asm):00025         fixchr: 
-7EBD 8140             (     vector3a.asm):00026                 cmpa #$40
-7EBF 250A             (     vector3a.asm):00027                 blo wrtchr
-7EC1 8180             (     vector3a.asm):00028                 cmpa #$80
-7EC3 2406             (     vector3a.asm):00029                 bhs wrtchr
-7EC5 8160             (     vector3a.asm):00030                 cmpa #$60
-7EC7 240E             (     vector3a.asm):00031                 bhs lcase
-7EC9                  (     vector3a.asm):00032         ucase:  
-7EC9 843F             (     vector3a.asm):00033                 anda #$3f
-7ECB                  (     vector3a.asm):00034         wrtchr:
-7ECB A780             (     vector3a.asm):00035                 sta ,x+
-7ECD 8C0600           (     vector3a.asm):00036                 cmpx #scrstt+rows*cols
-7ED0 2719             (     vector3a.asm):00037                 beq scroll
-7ED2                  (     vector3a.asm):00038         save:
-7ED2 BF7EA0           (     vector3a.asm):00039                 stx curpos3
-7ED5                  (     vector3a.asm):00040         exit:
-7ED5                  (     vector3a.asm):00041         nul:    
-7ED5 3596             (     vector3a.asm):00042                 puls a,b,x,pc
-7ED7                  (     vector3a.asm):00043         lcase:
-7ED7 8020             (     vector3a.asm):00044                 suba #$20
-7ED9 20F0             (     vector3a.asm):00045                 bra wrtchr
-                      (     vector3a.asm):00046         
-7EDB                  (     vector3a.asm):00047         cr:     
-7EDB 1F10             (     vector3a.asm):00048                 tfr x,d
-7EDD C41F             (     vector3a.asm):00049                 andb #cols-1
-7EDF 270A             (     vector3a.asm):00050                 beq scroll
-7EE1 50               (     vector3a.asm):00051                 negb
-7EE2 CB20             (     vector3a.asm):00052                 addb #cols
-7EE4 8620             (     vector3a.asm):00053                 lda #space
-7EE6                  (     vector3a.asm):00054         cr_lp:
-7EE6 A780             (     vector3a.asm):00055                 sta ,x+
-7EE8 5A               (     vector3a.asm):00056                 decb
-7EE9 26FB             (     vector3a.asm):00057                 bne cr_lp
-                      (     vector3a.asm):00058                 
-7EEB                  (     vector3a.asm):00059         scroll:
-7EEB 8E0500           (     vector3a.asm):00060                 ldx #scrstt
-7EEE                  (     vector3a.asm):00061         lp1@:   
-7EEE A68820           (     vector3a.asm):00062                 lda cols,x
-7EF1 A780             (     vector3a.asm):00063                 sta ,x+
-7EF3 8C05E0           (     vector3a.asm):00064                 cmpx #scrstt+(rows-1)*cols
-7EF6 26F6             (     vector3a.asm):00065                 bne lp1@
-7EF8 8620             (     vector3a.asm):00066                 lda #space
-7EFA 5F               (     vector3a.asm):00067                 clrb
-7EFB                  (     vector3a.asm):00068         lp2@:
-7EFB A785             (     vector3a.asm):00069                 sta b,x
-7EFD 5C               (     vector3a.asm):00070                 incb
-7EFE C120             (     vector3a.asm):00071                 cmpb #cols
-7F00 26F9             (     vector3a.asm):00072                 bne lp2@
-7F02 20CE             (     vector3a.asm):00073                 bra save
-                      (     vector3a.asm):00074         
-7F04                  (     vector3a.asm):00075         home:
-7F04 8E0500           (     vector3a.asm):00076                 ldx #scrstt
-7F07 20C9             (     vector3a.asm):00077                 bra save
-                      (     vector3a.asm):00078         
-                      (     vector3a.asm):00079                 ;; uses evil self modifying code :-)
-7F09                  (     vector3a.asm):00080         posn:
-7F09 8616             (     vector3a.asm):00081                 lda #$16
-7F0B B77EB4           (     vector3a.asm):00082                 sta branch
-7F0E CC005F           (     vector3a.asm):00083                 ldd #setx-branch-3
-7F11 FD7EB5           (     vector3a.asm):00084                 std branch+1
-7F14 3596             (     vector3a.asm):00085                 puls a,b,x,pc
-7F16                  (     vector3a.asm):00086         setx:
-7F16 8020             (     vector3a.asm):00087                 suba #$20
-7F18 B77EA2           (     vector3a.asm):00088                 sta xloc
-7F1B CC0069           (     vector3a.asm):00089                 ldd #sety-branch-3
-7F1E 3596             (     vector3a.asm):00090                 puls a,b,x,pc
-7F20                  (     vector3a.asm):00091         sety:
-7F20 8020             (     vector3a.asm):00092                 suba #$20
-7F22 C620             (     vector3a.asm):00093                 ldb #cols
-7F24 3D               (     vector3a.asm):00094                 mul
-7F25 2B0C             (     vector3a.asm):00095                 bmi skip@
-7F27 10830100         (     vector3a.asm):00096                 cmpd #rows*cols
-7F2B 2406             (     vector3a.asm):00097                 bhs skip@
-7F2D C30500           (     vector3a.asm):00098                 addd #scrstt
-7F30 FD7EA0           (     vector3a.asm):00099                 std curpos3
-7F33                  (     vector3a.asm):00100         skip@:
-7F33 CC8120           (     vector3a.asm):00101                 ldd #$8120              ; cmpa #$20
-7F36 FD7EB4           (     vector3a.asm):00102                 std branch
-7F39 8610             (     vector3a.asm):00103                 lda #$10                ; prebyte for lblo
-7F3B FD7EB6           (     vector3a.asm):00104                 std branch+2
-7F3E 3596             (     vector3a.asm):00105                 puls a,b,x,pc
-                      (     vector3a.asm):00106         
-7F40                  (     vector3a.asm):00107         erlin:
-7F40 F67EA1           (     vector3a.asm):00108                 ldb curpos3+1
-7F43 C4E0             (     vector3a.asm):00109                 andb #$100-cols         ; cols is power of 2
-7F45 F77EA1           (     vector3a.asm):00110                 stb curpos3+1
-                      (     vector3a.asm):00111         
-7F48                  (     vector3a.asm):00112         erendl:
-7F48 FC7EA0           (     vector3a.asm):00113                 ldd curpos3
-7F4B 1F01             (     vector3a.asm):00114                 tfr d,x
-7F4D 8620             (     vector3a.asm):00115                 lda #space
-7F4F C41F             (     vector3a.asm):00116                 andb #cols-1            ; cols is power of 2
-7F51 50               (     vector3a.asm):00117                 negb
-7F52 CB20             (     vector3a.asm):00118                 addb #cols
-7F54 301F             (     vector3a.asm):00119                 leax -1,x
-7F56                  (     vector3a.asm):00120         loop@:
-7F56 A785             (     vector3a.asm):00121                 sta b,x
-7F58 5A               (     vector3a.asm):00122                 decb
-7F59 26FB             (     vector3a.asm):00123                 bne loop@
-7F5B 3596             (     vector3a.asm):00124                 puls a,b,x,pc
-                      (     vector3a.asm):00125                 
-7F5D                  (     vector3a.asm):00126         currt:  
-7F5D 8C05FF           (     vector3a.asm):00127                 cmpx #scrstt+rows*cols-1
-7F60 1027FF71         (     vector3a.asm):00128                 lbeq exit
-7F64 3001             (     vector3a.asm):00129                 leax 1,x
-7F66 16FF69           (     vector3a.asm):00130                 lbra save
-                      (     vector3a.asm):00131         
-7F69                  (     vector3a.asm):00132         curlt:  
-7F69 8C0500           (     vector3a.asm):00133                 cmpx #scrstt
-7F6C 1027FF65         (     vector3a.asm):00134                 lbeq exit
-7F70 301F             (     vector3a.asm):00135                 leax -1,x
-7F72 16FF5D           (     vector3a.asm):00136                 lbra save
-                      (     vector3a.asm):00137         
-7F75 8C0520           (     vector3a.asm):00138         curup:  cmpx #scrstt+cols
-7F78 102DFF59         (     vector3a.asm):00139                 lblt exit
-7F7C 3088E0           (     vector3a.asm):00140                 leax -cols,x
-7F7F 16FF50           (     vector3a.asm):00141                 lbra save
-                      (     vector3a.asm):00142         
-7F82 8C05F8           (     vector3a.asm):00143         curdn:  cmpx #scrstt+rows*(cols-1)
-7F85 1024FF4C         (     vector3a.asm):00144                 lbhs exit
-7F89 308820           (     vector3a.asm):00145                 leax cols,x
-7F8C 16FF43           (     vector3a.asm):00146                 lbra save
-                      (     vector3a.asm):00147         
-7F8F                  (     vector3a.asm):00148         erends:
-7F8F 8620             (     vector3a.asm):00149                 lda #space
-7F91 BE7EA0           (     vector3a.asm):00150                 ldx curpos3
-7F94                  (     vector3a.asm):00151         loop@:
-7F94 A780             (     vector3a.asm):00152                 sta ,x+
-7F96 8C0600           (     vector3a.asm):00153                 cmpx #scrstt+rows*cols
-7F99 26F9             (     vector3a.asm):00154                 bne loop@
-7F9B 3596             (     vector3a.asm):00155                 puls a,b,x,pc
-                      (     vector3a.asm):00156         
-7F9D                  (     vector3a.asm):00157         cls:
-7F9D 8E0500           (     vector3a.asm):00158                 ldx #scrstt
-7FA0 BF7EA0           (     vector3a.asm):00159                 stx curpos3
-7FA3 CC2020           (     vector3a.asm):00160                 ldd #space*$0101
-7FA6                  (     vector3a.asm):00161         loop@:
-7FA6 ED81             (     vector3a.asm):00162                 std ,x++
-7FA8 8C0600           (     vector3a.asm):00163                 cmpx #scrstt+rows*cols
-7FAB 3596             (     vector3a.asm):00164                 puls a,b,x,pc
-                      (     vector3a.asm):00165                 
-7FAD                  (     vector3a.asm):00166         cntl:
-7FAD 48               (     vector3a.asm):00167                 asla
-7FAE 308D0002         (     vector3a.asm):00168                 leax ctltab,pcr
-7FB2 6E96             (     vector3a.asm):00169                 jmp [a,x]
-7FB4                  (     vector3a.asm):00170         ctltab:
-7FB4 7ED57F047F097F40 (     vector3a.asm):00171                 fdb nul,home,posn,erlin,erendl,nul,currt,nul
-     7F487ED57F5D7ED5
-7FC4 7F697F757F827F8F (     vector3a.asm):00172                 fdb curlt,curup,curdn,erends,cls,cr,nul,nul
-     7F9D7EDB7ED57ED5
-7FD4 7ED57ED57ED57ED5 (     vector3a.asm):00173                 fdb nul,nul,nul,nul,nul,nul,nul,nul
-     7ED57ED57ED57ED5
-7FE4 7ED57ED57ED57ED5 (     vector3a.asm):00174                 fdb nul,nul,nul,nul,nul,nul,nul,nul
-     7ED57ED57ED57ED5
+7EC0                  (     vector3a.asm):00008         curpos3:
+7EC0 0500             (     vector3a.asm):00009                 fdb scrstt
+7EC2                  (     vector3a.asm):00010         xloc:   rmb 1
+7EC3                  (     vector3a.asm):00011         rvec3_3:
+7EC3 3402             (     vector3a.asm):00012                 pshs a
+7EC5 966F             (     vector3a.asm):00013                 lda DEVNUM
+7EC7 81FD             (     vector3a.asm):00014                 cmpa #-3
+7EC9 3502             (     vector3a.asm):00015                 puls a
+7ECB 2703             (     vector3a.asm):00016                 beq cont@
+7ECD                  (     vector3a.asm):00017         ovec3:  rmb 3
+7ED0                  (     vector3a.asm):00018         cont@:
+7ED0 3262             (     vector3a.asm):00019                 leas 2,s
+7ED2 3416             (     vector3a.asm):00020                 pshs x,b,a
+7ED4                  (     vector3a.asm):00021         branch: 
+7ED4 8120             (     vector3a.asm):00022                 cmpa #$20
+7ED6 102500F6         (     vector3a.asm):00023                 lblo cntl
+7EDA BE7EC0           (     vector3a.asm):00024                 ldx curpos3
+7EDD                  (     vector3a.asm):00025         fixchr: 
+7EDD 8140             (     vector3a.asm):00026                 cmpa #$40
+7EDF 250A             (     vector3a.asm):00027                 blo wrtchr
+7EE1 8180             (     vector3a.asm):00028                 cmpa #$80
+7EE3 2406             (     vector3a.asm):00029                 bhs wrtchr
+7EE5 8160             (     vector3a.asm):00030                 cmpa #$60
+7EE7 240E             (     vector3a.asm):00031                 bhs lcase
+7EE9                  (     vector3a.asm):00032         ucase:  
+7EE9 843F             (     vector3a.asm):00033                 anda #$3f
+7EEB                  (     vector3a.asm):00034         wrtchr:
+7EEB A780             (     vector3a.asm):00035                 sta ,x+
+7EED                  (     vector3a.asm):00036         may_scroll:     
+7EED 8C0600           (     vector3a.asm):00037                 cmpx #scrstt+rows*cols
+7EF0 2709             (     vector3a.asm):00038                 beq scroll
+7EF2                  (     vector3a.asm):00039         save:
+7EF2 BF7EC0           (     vector3a.asm):00040                 stx curpos3
+7EF5                  (     vector3a.asm):00041         exit:
+7EF5 3596             (     vector3a.asm):00042                 puls a,b,x,pc
+7EF7                  (     vector3a.asm):00043         lcase:
+7EF7 8020             (     vector3a.asm):00044                 suba #$20
+7EF9 20F0             (     vector3a.asm):00045                 bra wrtchr
+                      (     vector3a.asm):00046                 
+7EFB                  (     vector3a.asm):00047         scroll:
+7EFB 8E0500           (     vector3a.asm):00048                 ldx #scrstt
+7EFE                  (     vector3a.asm):00049         lp1@:   
+7EFE A68820           (     vector3a.asm):00050                 lda cols,x
+7F01 A780             (     vector3a.asm):00051                 sta ,x+
+7F03 8C05E0           (     vector3a.asm):00052                 cmpx #scrstt+(rows-1)*cols
+7F06 26F6             (     vector3a.asm):00053                 bne lp1@
+7F08 8620             (     vector3a.asm):00054                 lda #space
+7F0A 5F               (     vector3a.asm):00055                 clrb
+7F0B                  (     vector3a.asm):00056         lp2@:
+7F0B A785             (     vector3a.asm):00057                 sta b,x
+7F0D 5C               (     vector3a.asm):00058                 incb
+7F0E C120             (     vector3a.asm):00059                 cmpb #cols
+7F10 26F9             (     vector3a.asm):00060                 bne lp2@
+7F12 20DE             (     vector3a.asm):00061                 bra save
+                      (     vector3a.asm):00062         
+7F14                  (     vector3a.asm):00063         cr:
+7F14 BE7EC0           (     vector3a.asm):00064                 ldx curpos3
+7F17 1F10             (     vector3a.asm):00065                 tfr x,d
+7F19 C41F             (     vector3a.asm):00066                 andb #cols-1
+7F1B 50               (     vector3a.asm):00067                 negb
+7F1C CB20             (     vector3a.asm):00068                 addb #cols
+7F1E 8620             (     vector3a.asm):00069                 lda #space
+7F20                  (     vector3a.asm):00070         loop@:
+7F20 A780             (     vector3a.asm):00071                 sta ,x+
+7F22 5A               (     vector3a.asm):00072                 decb
+7F23 26FB             (     vector3a.asm):00073                 bne loop@
+7F25 20C6             (     vector3a.asm):00074                 bra may_scroll
+                      (     vector3a.asm):00075         
+7F27                  (     vector3a.asm):00076         home:
+7F27 8E0500           (     vector3a.asm):00077                 ldx #scrstt
+7F2A 20C6             (     vector3a.asm):00078                 bra save
+                      (     vector3a.asm):00079         
+                      (     vector3a.asm):00080                 ;; uses evil self modifying code :-)
+7F2C                  (     vector3a.asm):00081         posn:
+7F2C 8616             (     vector3a.asm):00082                 lda #$16
+7F2E B77ED4           (     vector3a.asm):00083                 sta branch
+7F31 CC0062           (     vector3a.asm):00084                 ldd #setx-branch-3
+7F34 FD7ED5           (     vector3a.asm):00085                 std branch+1
+7F37 3596             (     vector3a.asm):00086                 puls a,b,x,pc
+7F39                  (     vector3a.asm):00087         setx:
+7F39 8020             (     vector3a.asm):00088                 suba #$20
+7F3B B77EC2           (     vector3a.asm):00089                 sta xloc
+7F3E CC006C           (     vector3a.asm):00090                 ldd #sety-branch-3
+7F41 3596             (     vector3a.asm):00091                 puls a,b,x,pc
+7F43                  (     vector3a.asm):00092         sety:
+7F43 8020             (     vector3a.asm):00093                 suba #$20
+7F45 C620             (     vector3a.asm):00094                 ldb #cols
+7F47 3D               (     vector3a.asm):00095                 mul
+7F48 2B0C             (     vector3a.asm):00096                 bmi skip@
+7F4A 10830100         (     vector3a.asm):00097                 cmpd #rows*cols
+7F4E 2406             (     vector3a.asm):00098                 bhs skip@
+7F50 C30500           (     vector3a.asm):00099                 addd #scrstt
+7F53 FD7EC0           (     vector3a.asm):00100                 std curpos3
+7F56                  (     vector3a.asm):00101         skip@:
+7F56 CC8120           (     vector3a.asm):00102                 ldd #$8120              ; cmpa #$20
+7F59 FD7ED4           (     vector3a.asm):00103                 std branch
+7F5C 8610             (     vector3a.asm):00104                 lda #$10                ; prebyte for lblo
+7F5E FD7ED6           (     vector3a.asm):00105                 std branch+2
+7F61 3596             (     vector3a.asm):00106                 puls a,b,x,pc
+                      (     vector3a.asm):00107         
+7F63                  (     vector3a.asm):00108         erlin:
+7F63 F67EC1           (     vector3a.asm):00109                 ldb curpos3+1
+7F66 C4E0             (     vector3a.asm):00110                 andb #$100-cols         ; cols is power of 2
+7F68 F77EC1           (     vector3a.asm):00111                 stb curpos3+1
+                      (     vector3a.asm):00112         
+7F6B                  (     vector3a.asm):00113         erendl:
+7F6B FC7EC0           (     vector3a.asm):00114                 ldd curpos3
+7F6E 1F01             (     vector3a.asm):00115                 tfr d,x
+7F70 8620             (     vector3a.asm):00116                 lda #space
+7F72 C41F             (     vector3a.asm):00117                 andb #cols-1            ; cols is power of 2
+7F74 50               (     vector3a.asm):00118                 negb
+7F75 CB20             (     vector3a.asm):00119                 addb #cols
+7F77 301F             (     vector3a.asm):00120                 leax -1,x
+7F79                  (     vector3a.asm):00121         loop@:
+7F79 A785             (     vector3a.asm):00122                 sta b,x
+7F7B 5A               (     vector3a.asm):00123                 decb
+7F7C 26FB             (     vector3a.asm):00124                 bne loop@
+7F7E 3596             (     vector3a.asm):00125                 puls a,b,x,pc
+                      (     vector3a.asm):00126                 
+7F80                  (     vector3a.asm):00127         currt:  
+7F80 8C05FF           (     vector3a.asm):00128                 cmpx #scrstt+rows*cols-1
+7F83 1027FF6E         (     vector3a.asm):00129                 lbeq exit
+7F87 3001             (     vector3a.asm):00130                 leax 1,x
+7F89 16FF66           (     vector3a.asm):00131                 lbra save
+                      (     vector3a.asm):00132         
+7F8C                  (     vector3a.asm):00133         curlt:  
+7F8C 8C0500           (     vector3a.asm):00134                 cmpx #scrstt
+7F8F 1027FF62         (     vector3a.asm):00135                 lbeq exit
+7F93 301F             (     vector3a.asm):00136                 leax -1,x
+7F95 16FF5A           (     vector3a.asm):00137                 lbra save
+                      (     vector3a.asm):00138         
+7F98 8C0520           (     vector3a.asm):00139         curup:  cmpx #scrstt+cols
+7F9B 102DFF56         (     vector3a.asm):00140                 lblt exit
+7F9F 3088E0           (     vector3a.asm):00141                 leax -cols,x
+7FA2 16FF4D           (     vector3a.asm):00142                 lbra save
+                      (     vector3a.asm):00143         
+7FA5 8C05F8           (     vector3a.asm):00144         curdn:  cmpx #scrstt+rows*(cols-1)
+7FA8 1024FF49         (     vector3a.asm):00145                 lbhs exit
+7FAC 308820           (     vector3a.asm):00146                 leax cols,x
+7FAF 16FF40           (     vector3a.asm):00147                 lbra save
+                      (     vector3a.asm):00148         
+7FB2                  (     vector3a.asm):00149         erends:
+7FB2 8620             (     vector3a.asm):00150                 lda #space
+7FB4 BE7EC0           (     vector3a.asm):00151                 ldx curpos3
+7FB7                  (     vector3a.asm):00152         loop@:
+7FB7 A780             (     vector3a.asm):00153                 sta ,x+
+7FB9 8C0600           (     vector3a.asm):00154                 cmpx #scrstt+rows*cols
+7FBC 26F9             (     vector3a.asm):00155                 bne loop@
+7FBE 3596             (     vector3a.asm):00156                 puls a,b,x,pc
+                      (     vector3a.asm):00157         
+7FC0                  (     vector3a.asm):00158         cls:
+7FC0 8E0500           (     vector3a.asm):00159                 ldx #scrstt
+7FC3 BF7EC0           (     vector3a.asm):00160                 stx curpos3
+7FC6 CC2020           (     vector3a.asm):00161                 ldd #space*$0101
+7FC9                  (     vector3a.asm):00162         loop@:
+7FC9 ED81             (     vector3a.asm):00163                 std ,x++
+7FCB 8C0600           (     vector3a.asm):00164                 cmpx #scrstt+rows*cols
+7FCE                  (     vector3a.asm):00165         nul:    
+7FCE 3596             (     vector3a.asm):00166                 puls a,b,x,pc
+                      (     vector3a.asm):00167                 
+7FD0                  (     vector3a.asm):00168         cntl:
+7FD0 810D             (     vector3a.asm):00169                 cmpa #$0d
+7FD2 1027FF3E         (     vector3a.asm):00170                 lbeq cr
+7FD6 22F6             (     vector3a.asm):00171                 bhi nul
+7FD8 48               (     vector3a.asm):00172                 asla
+7FD9 308D0002         (     vector3a.asm):00173                 leax ctltab,pcr
+7FDD 6E96             (     vector3a.asm):00174                 jmp [a,x]
+7FDF                  (     vector3a.asm):00175         ctltab:
+7FDF 7FCE7F277F2C7F63 (     vector3a.asm):00176                 fdb nul,home,posn,erlin,erendl,nul,currt,nul
+     7F6B7FCE7F807FCE
+7FEF 7F8C7F987FA57FB2 (     vector3a.asm):00177                 fdb curlt,curup,curdn,erends,cls
+     7FC0
                       (      print-3.asm):00020                 else
                       (      print-3.asm):00021                 include "vector3.asm"
                       (      print-3.asm):00022                 endc
