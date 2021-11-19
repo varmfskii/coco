@@ -1,0 +1,251 @@
+                      (      print-3.asm):00001                 org $7000
+                      (      print-3.asm):00002                 include "decbdefs.asm"
+     006A             (     decbdefs.asm):00001         DEVCFW: equ $006a               ; tab zone field width
+     006A             (     decbdefs.asm):00002         DEVLCF: equ $006a               ; last tab position
+     006B             (     decbdefs.asm):00003         DEVPOS: equ $006b               ; print position (column)
+     006C             (     decbdefs.asm):00004         DEVWID: equ $006c               ; print width
+     006E             (     decbdefs.asm):00005         PRTDEV: equ $006e               ; print device (-1 cassette/0 not cassette)
+     006F             (     decbdefs.asm):00006         DEVNUM: equ $006f               ; device number
+     0088             (     decbdefs.asm):00007         CURPOS: equ $0088               ; current position for device 0
+                      (     decbdefs.asm):00008                 
+     015E             (     decbdefs.asm):00009         RVEC0:  equ $015e               ; open
+     0161             (     decbdefs.asm):00010         RVEC1:  equ $0161               ; device number validity check
+     0164             (     decbdefs.asm):00011         RVEC2:  equ $0164               ; set print parameters
+     0167             (     decbdefs.asm):00012         RVEC3:  equ $0167               ; console out
+     016A             (     decbdefs.asm):00013         RVEC4:  equ $016a               ; console in
+     016D             (     decbdefs.asm):00014         RVEC5:  equ $016d               ; input device number check
+     0170             (     decbdefs.asm):00015         RVEC6:  equ $0170               ; output device number check
+     0173             (     decbdefs.asm):00016         RVEC7:  equ $0173               ; close all files
+     0176             (     decbdefs.asm):00017         RVEC8:  equ $0176               ; close one file
+     0179             (     decbdefs.asm):00018         RVEC9:  equ $0179               ; print
+     017C             (     decbdefs.asm):00019         RVEC10: equ $017c               ; input
+     017F             (     decbdefs.asm):00020         RVEC11: equ $017f               ; break check
+     0182             (     decbdefs.asm):00021         RVEC12: equ $0182               ; input basic line
+     0185             (     decbdefs.asm):00022         RVEC13: equ $0185               ; terminate basic line
+     0188             (     decbdefs.asm):00023         RVEC14: equ $0188               ; eof command
+     018B             (     decbdefs.asm):00024         RVEC15: equ $018b               ; evaluate expression
+     018E             (     decbdefs.asm):00025         RVEC16: equ $018e               ; on error goto
+     0191             (     decbdefs.asm):00026         RVEC17: equ $0191               ; error driver
+     0194             (     decbdefs.asm):00027         RVEC18: equ $0194               ; run
+     0197             (     decbdefs.asm):00028         RVEC19: equ $0197               ; ascii to fp
+     019A             (     decbdefs.asm):00029         RVEC20: equ $019a               ; basic command interpreter
+     019D             (     decbdefs.asm):00030         RVEC21: equ $019d               ; reset/set/point
+     01A0             (     decbdefs.asm):00031         RVEC22: equ $01a0               ; cls/secondary token/renum token chk/get/put
+     01A3             (     decbdefs.asm):00032         RVEC23: equ $01a3               ; tokenize line
+     01A6             (     decbdefs.asm):00033         RVEC24: equ $01a6               ; detokenize line
+                      (     decbdefs.asm):00034                 
+     0400             (     decbdefs.asm):00035         VIDRAM: equ $0400               ; start of screen memory
+                      (     decbdefs.asm):00036         
+     FFDE             (     decbdefs.asm):00037         RAMROM: equ $ffde               ; switch to RAM/ROM mode
+     FFDF             (     decbdefs.asm):00038         RAMRAM: equ $ffdf               ; switch to all RAM mode
+7000                  (      print-3.asm):00003         start:
+7000 8D05             (      print-3.asm):00004                 bsr allram
+7002 8D36             (      print-3.asm):00005                 bsr print0
+7004 8D53             (      print-3.asm):00006                 bsr patch_vec
+7006 39               (      print-3.asm):00007                 rts
+                      (      print-3.asm):00008                 include "allram.asm"
+7007                  (       allram.asm):00001         allram: 
+                      (       allram.asm):00002                 ;;  check if already in all RAM mode
+7007 B68000           (       allram.asm):00003                 lda $8000
+700A 1F89             (       allram.asm):00004                 tfr a,b
+700C 738000           (       allram.asm):00005                 com $8000
+700F B88000           (       allram.asm):00006                 eora $8000
+7012 2704             (       allram.asm):00007                 beq rom
+7014 F78000           (       allram.asm):00008                 stb $8000
+7017 39               (       allram.asm):00009                 rts
+                      (       allram.asm):00010         
+                      (       allram.asm):00011                 ;; copy ROMs to RAM
+7018                  (       allram.asm):00012         rom:    
+7018 3401             (       allram.asm):00013                 pshs cc
+701A 1A50             (       allram.asm):00014                 orcc #$50               ; disable interrupts
+701C 10DFFE           (       allram.asm):00015                 sts $fe
+701F 10CE8000         (       allram.asm):00016                 lds #$8000
+7023                  (       allram.asm):00017         loop@:
+7023 7FFFDE           (       allram.asm):00018                 clr RAMROM
+7026 3576             (       allram.asm):00019                 puls a,b,x,y,u
+7028 7FFFDF           (       allram.asm):00020                 clr RAMRAM
+702B 3476             (       allram.asm):00021                 pshs u,y,x,a,b
+702D 3268             (       allram.asm):00022                 leas 8,s
+702F 118CFF00         (       allram.asm):00023                 cmps #$ff00
+7033 2FEE             (       allram.asm):00024                 ble loop@
+7035 10DEFE           (       allram.asm):00025                 lds $fe
+7038 3581             (       allram.asm):00026                 puls cc,pc
+                      (       allram.asm):00027                 
+                      (      print-3.asm):00009                 include "print0.asm"
+703A                  (       print0.asm):00001         print0:
+                      (       print0.asm):00002                 ;; modify PRINT@ limit
+703A 8E00FF           (       print0.asm):00003                 ldx #255
+703D BFA558           (       print0.asm):00004                 stx $a558 ; limit
+7040 30890400         (       print0.asm):00005                 leax VIDRAM,x ; adjust back to memory location
+7044 BFA55F           (       print0.asm):00006                 stx $a55f ; adjusts
+                      (       print0.asm):00007                 ;; modify CLS end
+7047 BFA932           (       print0.asm):00008                 stx $a932 ; cls end
+                      (       print0.asm):00009                 ;; modify CHROUT limit
+704A BFA347           (       print0.asm):00010                 stx $a347 ; memory location limit
+704D 3088E1           (       print0.asm):00011                 leax -31,x ; beginning of last line
+7050 BFA354           (       print0.asm):00012                 stx $a354 ; scroll limit
+                      (       print0.asm):00013                 ;; set cursor at top of screen
+7053 8E0400           (       print0.asm):00014                 ldx #VIDRAM
+7056 9F88             (       print0.asm):00015                 stx CURPOS
+7058 39               (       print0.asm):00016                 rts
+                      (      print-3.asm):00010                 include "patch_vec.asm"
+                      (    patch_vec.asm):00001         
+                      (    patch_vec.asm):00002                 ;; patch vectors
+7059                  (    patch_vec.asm):00003         patch_vec:
+                      (    patch_vec.asm):00004                 ;; save in new code
+7059 CE7076           (    patch_vec.asm):00005                 ldu #vectors
+705C                  (    patch_vec.asm):00006         loop@:  
+705C AEC1             (    patch_vec.asm):00007                 ldx ,u++
+705E 2715             (    patch_vec.asm):00008                 beq exit@
+7060 10AEC1           (    patch_vec.asm):00009                 ldy ,u++
+7063 A684             (    patch_vec.asm):00010                 lda ,x
+7065 A7A0             (    patch_vec.asm):00011                 sta ,y+
+7067 867E             (    patch_vec.asm):00012                 lda #$7e
+7069 A780             (    patch_vec.asm):00013                 sta ,x+
+706B EC84             (    patch_vec.asm):00014                 ldd ,x
+706D EDA4             (    patch_vec.asm):00015                 std ,y
+706F ECC1             (    patch_vec.asm):00016                 ldd ,u++
+7071 ED84             (    patch_vec.asm):00017                 std ,x
+7073 20E7             (    patch_vec.asm):00018                 bra loop@
+7075                  (    patch_vec.asm):00019         exit@:  
+7075 39               (    patch_vec.asm):00020                 rts
+7076                  (    patch_vec.asm):00021         vectors:
+7076 01617F5A7F50     (    patch_vec.asm):00022                 fdb RVEC1,ovec1,rvec1_3
+707C 01647F677F5D     (    patch_vec.asm):00023                 fdb RVEC2,ovec2,rvec2_3
+7082 01677F8C7F82     (    patch_vec.asm):00024                 fdb RVEC3,ovec3,rvec3_3
+7088 0000             (    patch_vec.asm):00025                 fdb $0000
+                      (      print-3.asm):00011                 ifdef ADV
+                      (      print-3.asm):00012                 org $7e70
+                      (      print-3.asm):00013                 else
+                      (      print-3.asm):00014                 org $7f50
+                      (      print-3.asm):00015                 endc
+                      (      print-3.asm):00016                 include "vector1.asm"
+                      (      vector1.asm):00001                 
+                      (      vector1.asm):00002                 ;; Validate device number
+7F50                  (      vector1.asm):00003         rvec1_3:
+7F50 3262             (      vector1.asm):00004                 leas 2,s
+7F52 39               (      vector1.asm):00005                 rts
+7F53 C1FD             (      vector1.asm):00006                 cmpb #-3
+7F55 2603             (      vector1.asm):00007                 bne ovec1
+7F57 3262             (      vector1.asm):00008                 leas 2,s
+7F59 39               (      vector1.asm):00009                 rts
+7F5A                  (      vector1.asm):00010         ovec1:  rmb 3
+                      (      vector1.asm):00011         
+                      (      print-3.asm):00017                 include "vector2.asm"
+                      (      vector2.asm):00001                 
+                      (      vector2.asm):00002                 ;; set print parameters
+7F5D                  (      vector2.asm):00003         rvec2_3:
+7F5D 3402             (      vector2.asm):00004                 pshs a                  ;
+7F5F 966F             (      vector2.asm):00005                 lda DEVNUM
+7F61 81FD             (      vector2.asm):00006                 cmpa #-3
+7F63 3502             (      vector2.asm):00007                 puls a
+7F65 2703             (      vector2.asm):00008                 beq cont@
+7F67                  (      vector2.asm):00009         ovec2:  rmb 3
+7F6A                  (      vector2.asm):00010         cont@:  
+7F6A 3262             (      vector2.asm):00011                 leas 2,s
+7F6C 3416             (      vector2.asm):00012                 pshs x,b,a
+7F6E 0F6E             (      vector2.asm):00013                 clr PRTDEV
+                      (      vector2.asm):00014                 ;; a=current column
+7F70 B67F81           (      vector2.asm):00015                 lda curpos3+1
+7F73 841F             (      vector2.asm):00016                 anda #$1f
+                      (      vector2.asm):00017                 ;; xhi=tab size, xlo=last tab column
+7F75 8E0818           (      vector2.asm):00018                 ldx #$0818
+                      (      vector2.asm):00019                 ;; b=number of columns
+7F78 C620             (      vector2.asm):00020                 ldb #cols
+7F7A 9F6A             (      vector2.asm):00021                 stx DEVCFW
+7F7C DD6B             (      vector2.asm):00022                 std DEVPOS
+7F7E 3596             (      vector2.asm):00023                 puls a,b,x,pc
+                      (      print-3.asm):00018                 ifdef ADV
+                      (      print-3.asm):00019                 include "vector3a.asm"
+                      (      print-3.asm):00020                 else
+                      (      print-3.asm):00021                 include "vector3.asm"
+                      (      vector3.asm):00001                 
+                      (      vector3.asm):00002                 ;; output to device
+     0008             (      vector3.asm):00003         rows:   equ 8
+     0020             (      vector3.asm):00004         cols:   equ 32
+     0500             (      vector3.asm):00005         scrstt: equ $0500
+     0008             (      vector3.asm):00006         bs:     equ $08
+     0013             (      vector3.asm):00007         cr:     equ $13
+     0020             (      vector3.asm):00008         space:  equ $20
+                      (      vector3.asm):00009         
+7F80                  (      vector3.asm):00010         curpos3:
+7F80 0500             (      vector3.asm):00011                 fdb $0500
+7F82                  (      vector3.asm):00012         rvec3_3:
+7F82 3402             (      vector3.asm):00013                 pshs a
+7F84 966F             (      vector3.asm):00014                 lda DEVNUM
+7F86 81FD             (      vector3.asm):00015                 cmpa #-3
+7F88 3502             (      vector3.asm):00016                 puls a
+7F8A 2703             (      vector3.asm):00017                 beq cont@
+7F8C                  (      vector3.asm):00018         ovec3:  rmb 3
+7F8F                  (      vector3.asm):00019         cont@:
+7F8F 3262             (      vector3.asm):00020                 leas 2,s
+7F91 3416             (      vector3.asm):00021                 pshs x,b,a
+7F93 BE7F80           (      vector3.asm):00022                 ldx curpos3
+7F96 8120             (      vector3.asm):00023                 cmpa #$20
+7F98 251E             (      vector3.asm):00024                 blo cntl
+7F9A 8140             (      vector3.asm):00025                 cmpa #$40
+7F9C 250A             (      vector3.asm):00026                 blo wrtchr
+7F9E 8180             (      vector3.asm):00027                 cmpa #$80
+7FA0 2406             (      vector3.asm):00028                 bhs wrtchr
+7FA2 8160             (      vector3.asm):00029                 cmpa #$60
+7FA4 240E             (      vector3.asm):00030                 bhs lcase
+7FA6                  (      vector3.asm):00031         ucase:  
+7FA6 843F             (      vector3.asm):00032                 anda #$3f
+7FA8                  (      vector3.asm):00033         wrtchr:
+7FA8 A780             (      vector3.asm):00034                 sta ,x+
+7FAA 8C0600           (      vector3.asm):00035                 cmpx #scrstt+rows*cols
+7FAD 272C             (      vector3.asm):00036                 beq scroll
+7FAF                  (      vector3.asm):00037         save:
+7FAF BF7F80           (      vector3.asm):00038                 stx curpos3
+7FB2                  (      vector3.asm):00039         exit:
+7FB2 3596             (      vector3.asm):00040                 puls a,b,x,pc
+7FB4                  (      vector3.asm):00041         lcase:
+7FB4 8020             (      vector3.asm):00042                 suba #$20
+7FB6 20F0             (      vector3.asm):00043                 bra wrtchr
+7FB8                  (      vector3.asm):00044         cntl:   
+7FB8 8108             (      vector3.asm):00045                 cmpa #bs
+7FBA 260B             (      vector3.asm):00046                 bne not_bs
+                      (      vector3.asm):00047         
+7FBC                  (      vector3.asm):00048         is_bs:  
+7FBC 8C0500           (      vector3.asm):00049                 cmpx #scrstt
+7FBF 3596             (      vector3.asm):00050                 puls a,b,x,pc
+7FC1 8620             (      vector3.asm):00051                 lda #space
+7FC3 A782             (      vector3.asm):00052                 sta ,-x
+7FC5 20E8             (      vector3.asm):00053                 bra save
+                      (      vector3.asm):00054                 
+7FC7                  (      vector3.asm):00055         not_bs:
+7FC7 8113             (      vector3.asm):00056                 cmpa #cr
+7FC9 2629             (      vector3.asm):00057                 bne not_cr
+                      (      vector3.asm):00058         
+7FCB                  (      vector3.asm):00059         is_cr:  
+7FCB 1F10             (      vector3.asm):00060                 tfr x,d
+7FCD C41F             (      vector3.asm):00061                 andb #cols-1
+7FCF 270A             (      vector3.asm):00062                 beq scroll
+7FD1 50               (      vector3.asm):00063                 negb
+7FD2 CB20             (      vector3.asm):00064                 addb #cols
+7FD4 8620             (      vector3.asm):00065                 lda #space
+7FD6                  (      vector3.asm):00066         cr_lp:
+7FD6 A780             (      vector3.asm):00067                 sta ,x+
+7FD8 5A               (      vector3.asm):00068                 decb
+7FD9 26FB             (      vector3.asm):00069                 bne cr_lp
+                      (      vector3.asm):00070                 
+7FDB                  (      vector3.asm):00071         scroll:
+7FDB 8E0500           (      vector3.asm):00072                 ldx #scrstt
+7FDE                  (      vector3.asm):00073         lp1@:   
+7FDE A68820           (      vector3.asm):00074                 lda cols,x
+7FE1 A780             (      vector3.asm):00075                 sta ,x+
+7FE3 8C05E0           (      vector3.asm):00076                 cmpx #scrstt+(rows-1)*cols
+7FE6 26F6             (      vector3.asm):00077                 bne lp1@
+7FE8 8620             (      vector3.asm):00078                 lda #space
+7FEA 5F               (      vector3.asm):00079                 clrb
+7FEB                  (      vector3.asm):00080         lp2@:
+7FEB A785             (      vector3.asm):00081                 sta b,x
+7FED 5C               (      vector3.asm):00082                 incb
+7FEE C120             (      vector3.asm):00083                 cmpb #cols
+7FF0 26F9             (      vector3.asm):00084                 bne lp2@
+7FF2 20BB             (      vector3.asm):00085                 bra save
+                      (      vector3.asm):00086         
+7FF4                  (      vector3.asm):00087         not_cr:
+7FF4 3596             (      vector3.asm):00088                 puls a,b,x,pc
+                      (      print-3.asm):00022                 endc
+                      (      print-3.asm):00023                 end start

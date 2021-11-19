@@ -1,5 +1,14 @@
 	
 	;; output to device
+rows:	equ 8
+cols:	equ 32
+scrstt:	equ $0500
+bs:	equ $08
+cr:	equ $13
+space:	equ $20
+
+curpos3:
+	fdb $0500
 rvec3_3:
 	pshs a
 	lda DEVNUM
