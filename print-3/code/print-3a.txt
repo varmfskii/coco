@@ -1,43 +1,47 @@
                       (      print-3.asm):00001                 org $7000
                       (      print-3.asm):00002                 include "decbdefs.asm"
-     006A             (     decbdefs.asm):00001         DEVCFW: equ $006a               ; tab zone field width
-     006B             (     decbdefs.asm):00002         DEVLCF: equ $006b               ; last tab position
-     006C             (     decbdefs.asm):00003         DEVPOS: equ $006c               ; print position (column)
-     006D             (     decbdefs.asm):00004         DEVWID: equ $006d               ; print width
-     006E             (     decbdefs.asm):00005         PRTDEV: equ $006e               ; print device (-1 cassette/0 not cassette)
-     006F             (     decbdefs.asm):00006         DEVNUM: equ $006f               ; device number
-     0088             (     decbdefs.asm):00007         CURPOS: equ $0088               ; current position for device 0
-                      (     decbdefs.asm):00008                 
-     015E             (     decbdefs.asm):00009         RVEC0:  equ $015e               ; open
-     0161             (     decbdefs.asm):00010         RVEC1:  equ $0161               ; device number validity check
-     0164             (     decbdefs.asm):00011         RVEC2:  equ $0164               ; set print parameters
-     0167             (     decbdefs.asm):00012         RVEC3:  equ $0167               ; console out
-     016A             (     decbdefs.asm):00013         RVEC4:  equ $016a               ; console in
-     016D             (     decbdefs.asm):00014         RVEC5:  equ $016d               ; input device number check
-     0170             (     decbdefs.asm):00015         RVEC6:  equ $0170               ; output device number check
-     0173             (     decbdefs.asm):00016         RVEC7:  equ $0173               ; close all files
-     0176             (     decbdefs.asm):00017         RVEC8:  equ $0176               ; close one file
-     0179             (     decbdefs.asm):00018         RVEC9:  equ $0179               ; print
-     017C             (     decbdefs.asm):00019         RVEC10: equ $017c               ; input
-     017F             (     decbdefs.asm):00020         RVEC11: equ $017f               ; break check
-     0182             (     decbdefs.asm):00021         RVEC12: equ $0182               ; input basic line
-     0185             (     decbdefs.asm):00022         RVEC13: equ $0185               ; terminate basic line
-     0188             (     decbdefs.asm):00023         RVEC14: equ $0188               ; eof command
-     018B             (     decbdefs.asm):00024         RVEC15: equ $018b               ; evaluate expression
-     018E             (     decbdefs.asm):00025         RVEC16: equ $018e               ; on error goto
-     0191             (     decbdefs.asm):00026         RVEC17: equ $0191               ; error driver
-     0194             (     decbdefs.asm):00027         RVEC18: equ $0194               ; run
-     0197             (     decbdefs.asm):00028         RVEC19: equ $0197               ; ascii to fp
-     019A             (     decbdefs.asm):00029         RVEC20: equ $019a               ; basic command interpreter
-     019D             (     decbdefs.asm):00030         RVEC21: equ $019d               ; reset/set/point
-     01A0             (     decbdefs.asm):00031         RVEC22: equ $01a0               ; cls/secondary token/renum token chk/get/put
-     01A3             (     decbdefs.asm):00032         RVEC23: equ $01a3               ; tokenize line
-     01A6             (     decbdefs.asm):00033         RVEC24: equ $01a6               ; detokenize line
-                      (     decbdefs.asm):00034                 
-     0400             (     decbdefs.asm):00035         VIDRAM: equ $0400               ; start of screen memory
-                      (     decbdefs.asm):00036         
-     FFDE             (     decbdefs.asm):00037         RAMROM: equ $ffde               ; switch to RAM/ROM mode
-     FFDF             (     decbdefs.asm):00038         RAMRAM: equ $ffdf               ; switch to all RAM mode
+                      (     decbdefs.asm):00001                 ifndef DECBDEFS
+     00FF             (     decbdefs.asm):00002         DECBDEFS:       equ $ff
+     006A             (     decbdefs.asm):00003         DEVCFW: equ $006a               ; tab zone field width
+     006B             (     decbdefs.asm):00004         DEVLCF: equ $006b               ; last tab position
+     006C             (     decbdefs.asm):00005         DEVPOS: equ $006c               ; print position (column)
+     006D             (     decbdefs.asm):00006         DEVWID: equ $006d               ; print width
+     006E             (     decbdefs.asm):00007         PRTDEV: equ $006e               ; print device (-1 cassette/0 not cassette)
+     006F             (     decbdefs.asm):00008         DEVNUM: equ $006f               ; device number
+     0088             (     decbdefs.asm):00009         CURPOS: equ $0088               ; current position for device 0
+                      (     decbdefs.asm):00010                 
+     015E             (     decbdefs.asm):00011         RVEC0:  equ $015e               ; open
+     0161             (     decbdefs.asm):00012         RVEC1:  equ $0161               ; device number validity check
+     0164             (     decbdefs.asm):00013         RVEC2:  equ $0164               ; set print parameters
+     0167             (     decbdefs.asm):00014         RVEC3:  equ $0167               ; console out
+     016A             (     decbdefs.asm):00015         RVEC4:  equ $016a               ; console in
+     016D             (     decbdefs.asm):00016         RVEC5:  equ $016d               ; input device number check
+     0170             (     decbdefs.asm):00017         RVEC6:  equ $0170               ; output device number check
+     0173             (     decbdefs.asm):00018         RVEC7:  equ $0173               ; close all files
+     0176             (     decbdefs.asm):00019         RVEC8:  equ $0176               ; close one file
+     0179             (     decbdefs.asm):00020         RVEC9:  equ $0179               ; print
+     017C             (     decbdefs.asm):00021         RVEC10: equ $017c               ; input
+     017F             (     decbdefs.asm):00022         RVEC11: equ $017f               ; break check
+     0182             (     decbdefs.asm):00023         RVEC12: equ $0182               ; input basic line
+     0185             (     decbdefs.asm):00024         RVEC13: equ $0185               ; terminate basic line
+     0188             (     decbdefs.asm):00025         RVEC14: equ $0188               ; eof command
+     018B             (     decbdefs.asm):00026         RVEC15: equ $018b               ; evaluate expression
+     018E             (     decbdefs.asm):00027         RVEC16: equ $018e               ; on error goto
+     0191             (     decbdefs.asm):00028         RVEC17: equ $0191               ; error driver
+     0194             (     decbdefs.asm):00029         RVEC18: equ $0194               ; run
+     0197             (     decbdefs.asm):00030         RVEC19: equ $0197               ; ascii to fp
+     019A             (     decbdefs.asm):00031         RVEC20: equ $019a               ; basic command interpreter
+     019D             (     decbdefs.asm):00032         RVEC21: equ $019d               ; reset/set/point
+     01A0             (     decbdefs.asm):00033         RVEC22: equ $01a0               ; cls/secondary token/renum token chk/get/put
+     01A3             (     decbdefs.asm):00034         RVEC23: equ $01a3               ; tokenize line
+     01A6             (     decbdefs.asm):00035         RVEC24: equ $01a6               ; detokenize line
+                      (     decbdefs.asm):00036                 
+     0400             (     decbdefs.asm):00037         VIDRAM: equ $0400               ; start of screen memory
+                      (     decbdefs.asm):00038         
+     FFDE             (     decbdefs.asm):00039         RAMROM: equ $ffde               ; switch to RAM/ROM mode
+     FFDF             (     decbdefs.asm):00040         RAMRAM: equ $ffdf               ; switch to all RAM mode
+                      (     decbdefs.asm):00041                 endc
+                      (     decbdefs.asm):00042                 
 7000                  (      print-3.asm):00003         start:
 7000 8D05             (      print-3.asm):00004                 bsr allram
 7002 8D36             (      print-3.asm):00005                 bsr print0

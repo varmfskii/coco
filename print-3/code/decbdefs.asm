@@ -1,3 +1,5 @@
+	ifndef DECBDEFS
+DECBDEFS:	equ $ff
 DEVCFW:	equ $006a		; tab zone field width
 DEVLCF:	equ $006b		; last tab position
 DEVPOS:	equ $006c		; print position (column)
@@ -36,3 +38,5 @@ VIDRAM:	equ $0400		; start of screen memory
 
 RAMROM:	equ $ffde		; switch to RAM/ROM mode
 RAMRAM:	equ $ffdf		; switch to all RAM mode
+	endc
+	
