@@ -1,7 +1,30 @@
 #include <stdio.h>
 #include <stdint.h>
 
-typedef struct id {
+typedef struct opt {
+  uint8_t dtp;
+  uint8_t drv;
+  uint8_t stp;
+  uint8_t typ;
+  uint8_t dns;
+  uint8_t cyl[2];
+  uint8_t sid;
+  uint8_t vfy;
+  uint8_t sct[2];
+  uint8_t t0s[2];
+  uint8_t ilv;
+  uint8_t sas;
+  uint8_t tfm;
+  uint8_t exten[2];
+  uint8_t stoff;
+  uint8_t att;
+  uint8_t fd[3];
+  uint8_t dfd[3];
+  uint8_t dcp[4];
+  uint8_t dvt[2];
+} opt;
+
+typedef struct lsn0 {
   uint8_t tot[3];
   uint8_t tks;
   uint8_t map[2];
@@ -17,15 +40,29 @@ typedef struct id {
   uint8_t bsz[2];
   uint8_t dat[5];
   uint8_t nam[32];
-  uint8_t opt[193];
-} id;
+  opt opt;
+  uint8_t xxx[161];
+} lsn0;
 
-int get2(uint8_t *);
-int get3(uint8_t *);
-void print_high(char *);
+static inline int get2(uint8_t *v) {
+  return (v[0]<<8)+v[1];
+}
+
+static inline int get3(uint8_t *v) {
+  return (v[0]<<16)+(v[1]<<8)+v[2];
+}  
+
+static inline int get4(uint8_t *v) {
+  return (v[0]<<24)+(v[1]<<16)+(v[2]<<8)+v[3];
+}  
+
+static inline void print_high(char *s) {
+  while(!((*s)&0x80)) putchar(*(s++));
+  putchar(*s&0x7f);
+}
 
 int main(int argc, uint8_t *argv[]) {
-  id lsn0;
+  lsn0 lsn0;
   
   FILE *in=stdin;
 
@@ -44,7 +81,9 @@ int main(int argc, uint8_t *argv[]) {
   printf("Cluster size: %d\n", get2(lsn0.bit));
   printf("Root dir lsn: %d\n", get3(lsn0.dir));
   printf("Owner ID: %d\n", get2(lsn0.own));
-  printf("Attributes: %02x\n", lsn0.att);
+  printf("Attributes: %02x = ", lsn0.att);
+  for(int i=7; i>=0; i--) putchar(((1<<i)&lsn0.att)?"dsewrewr"[7-i]:'-');
+  putchar('\n');
   printf("Sectors per track: %d\n", get2(lsn0.spt));
   printf("Reserved: %04x\n", get2(lsn0.res));
   printf("Boot lsn: %d\n", get3(lsn0.bt));
@@ -55,24 +94,34 @@ int main(int argc, uint8_t *argv[]) {
   print_high(lsn0.nam);
   putchar('\n');
   puts("--------------------------------------");
-  for(int i=0; i<193; i++) {
-    if (i%16==15)
-      printf("%02x\n", lsn0.opt[i]);
-    else
-      printf("%02x ", lsn0.opt[i]);
+  printf("Device class: %d = ", lsn0.opt.dtp);
+  switch(lsn0.opt.dtp) {
+  case 0:
+    puts("SCF");
+    break;
+  case 1:
+    puts("RBF");
+    break;
+  case 2:
+    puts("PIPE");
+    break;
+  case 3:
+    puts("SBF");
+    break;
+  default:
+    puts("Unknown");
   }
-  putchar('\n');
-}
-
-int get2(uint8_t *v) {
-  return v[0]*256+v[1];
-}
-
-int get3(uint8_t *v) {
-  return v[0]*65536+v[1]*256+v[2];
-}  
-
-void print_high(char *s) {
-  while(!((*s)&0x80)) putchar(*(s++));
-  putchar(*s&0x7f);
+  printf("Drive number: %d\n", lsn0.opt.drv);
+  printf("Device type: %02x\n", lsn0.opt.typ);
+  printf("Density capability: %02x\n", lsn0.opt.dns);
+  printf("Number of cylinders: %d\n", get2(lsn0.opt.cyl));
+  printf("Number of sides: %d\n", lsn0.opt.sid);
+  printf("Verify: %s\n", lsn0.opt.vfy?"false":"true");
+  printf("Sectors per track: %d\n", get2(lsn0.opt.sct));
+  printf("Sectors in track 0: %d\n", get2(lsn0.opt.t0s));
+  printf("Sector interleave: %d\n", lsn0.opt.ilv);
+  printf("Segment allocation size: %d\n", lsn0.opt.sas);
+  printf("DMA transfer mode: %d\n", lsn0.opt.tfm);
+  printf("Path extension: %d\n", get2(lsn0.opt.exten));
+  printf("Sector/track offset: %d\n", lsn0.opt.stoff);
 }
