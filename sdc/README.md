@@ -4,21 +4,20 @@ An access library for the cocosdc
 
 ## Functions
 
-* sdc_enable - working
-* sdc_disable - working
-* sdc_delete - working
-* sdc_dir_get - working
-* sdc_dir_init - working
-* sdc_dir_make - working
-* sdc_dir_page - working
-* sdc_dir_set - working
-* sdc_img_info - working
-* sdc_img_mount - working
-* sdc_img_new - working
-* sdc_img_size - working
-* sdc_lsec_rx - working
-* sdc_lsec_tx - untested
-* sdc_str_sector - working
-* sdc_str_start - working
-* sdc_str_abort - working
-
+* sdc_enable - tests 01-13
+* sdc_disable - tests 01-13
+* sdc_delete - test 12
+* sdc_dir_get - test 02
+* sdc_dir_init - test 05
+* sdc_dir_make - test 08
+* sdc_dir_page - test 05
+* sdc_dir_set - test 09
+* sdc_img_info - test 03
+* sdc_img_mount - test 11
+* sdc_img_new - test 10
+* sdc_img_size - test 04
+* sdc_lsec_rx - tests 06,13
+* sdc_lsec_tx - test 13
+* sdc_str_sector - test 07
+* sdc_str_start - test 07
+* sdc_str_abort - test 07

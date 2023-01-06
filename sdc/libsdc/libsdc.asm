@@ -12,6 +12,7 @@
 ;;; CC = z clear on error
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 	include decb.asm
 	include sdc.asm
 
@@ -56,6 +57,8 @@ sdc_disable:
 	puls cc,pc
 
 sdc_lsec_rx:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; Read Logical Sector (256-byte sector)
 ;;;
 ;;; A = drive number
@@ -65,8 +68,10 @@ sdc_lsec_rx:
 ;;; Y = sdc_param1 ($ff4a)
 ;;;
 ;;; A = status
-;;; U = address of first byte of sector read
+;;; U = address of first byte after sector read
 ;;; CC = z clear on error
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	pshs b,x
 	stb -1,y
 	stx ,y
@@ -87,6 +92,8 @@ return@:
 	puls x,b,pc
 
 sdc_str_start:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; Stream (512-byte sectors)
 ;;;
 ;;; A = drive number
@@ -96,6 +103,8 @@ sdc_str_start:
 ;;;
 ;;; A = status
 ;;; CC = z clear on error
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	pshs b
 	ora #sdc_stream
 	stb -1,y
@@ -109,6 +118,8 @@ return@:
 	puls b,pc
 
 sdc_str_sector:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; Stream next sector (512-byte sectors)
 ;;;
 ;;; U = buffer
@@ -117,6 +128,8 @@ sdc_str_sector:
 ;;; A = status
 ;;; U = adress of first byte after sector read
 ;;; CC = z clear on error
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	pshs b,x
 	clrb
 	lbsr _ready
@@ -130,6 +143,8 @@ return@:
 	puls x,b,pc
 
 sdc_lsec_tx:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; Write Logical Sector (256-byte sector)
 ;;;
 ;;; A = drive number
@@ -141,6 +156,8 @@ sdc_lsec_tx:
 ;;; A = status
 ;;; U = first byte after sector written
 ;;; CC = z clear on error
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	pshs b,x
 	stb -1,y
 	stx ,y
@@ -191,6 +208,8 @@ return@:
 	puls u,x,b,pc
 
 sdc_dir_page:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; $3e - Directory page (follows call to Initiate directory listing)
 ;;;
 ;;; U = buffer
@@ -207,9 +226,13 @@ sdc_dir_page:
 ;;; 		$02	hidden
 ;;; 		$01	locked
 ;;; 	12-15	size in bytes (big endian)
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	_rdcmd0 '>'
 
 sdc_dir_get:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; $43 - Get current directory
 ;;;
 ;;; U = buffer
@@ -223,9 +246,13 @@ sdc_dir_get:
 ;;; 	8-10	extension
 ;;; 	11-31	private
 ;;; 	32-255	reserved
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	_rdcmd0 'C'
 
 sdc_img_info:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; $49 - Get info for mounted image
 ;;;
 ;;; A = drive number
@@ -246,9 +273,13 @@ sdc_img_info:
 ;;; 	12-27	reserved
 ;;; 	28-31	file size in bytes (little endian)
 ;;; 	32-255	reserved
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	_rdcmd1 'I'
 
 sdc_img_size:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; $51 - Query size of a DSK image (256-byte sectors)
 ;;;
 ;;; A = drive number
@@ -260,6 +291,8 @@ sdc_img_size:
 ;;; CC = z clear on error
 ;;;
 ;;; 	0-3	file size in sectors (big endian)
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	pshs b,u
 	ora #sdc_ex_cmd	
 	ldb #'Q'
@@ -282,12 +315,16 @@ return@:
 	puls u,b,pc
 
 sdc_str_abort:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; Abort stream
 ;;;
 ;;; Y = sdc_param1 ($ff4a)
 ;;; 
 ;;; A = status
 ;;; CC = z clear on error
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	lda #sdc_abort
 	sta -2,y
 	lbsr _nobusy
@@ -323,16 +360,22 @@ return@:
 	puls x,b,pc
 
 sdc_dir_set:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; $44 - Set current directory
 ;;;
 ;;; U = Path to directory
 ;;; Y = sdc_param1 ($ff4a)
 ;;;
 ;;; A = status
-;;; CC = z clear on errorM
+;;; CC = z clear on error
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	_wrcmd0 'D'
 
 sdc_dir_make:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; $4b - Create new directory
 ;;;
 ;;; U = Path to file
@@ -340,9 +383,13 @@ sdc_dir_make:
 ;;;
 ;;; A = status
 ;;; CC = z clear on error
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	_wrcmd0 'K'
 
 sdc_dir_init:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; $4c - Initiate directory listing (followed by calls to Cirectory page)
 ;;;
 ;;; U = Path to file
@@ -350,9 +397,13 @@ sdc_dir_init:
 ;;;
 ;;; A = status
 ;;; CC = z clear on error
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	_wrcmd0 'L'
 
 sdc_img_mount:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; $4d - Mount image
 ;;;
 ;;; A = drive number
@@ -361,9 +412,13 @@ sdc_img_mount:
 ;;;
 ;;; A = status
 ;;; CC = z clear on error
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	_wrcmd1 'M'
 
 sdc_img_new:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; $4e - Mount new image
 ;;;
 ;;; A = drive number
@@ -372,9 +427,13 @@ sdc_img_new:
 ;;;
 ;;; A = status
 ;;; CC = z clear on error
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	_wrcmd1 'N'
 
 sdc_delete:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; 
 ;;; $58 - Delete file or directory
 ;;;
 ;;; U = Path to file
@@ -382,6 +441,8 @@ sdc_delete:
 ;;;
 ;;; A = status
 ;;; CC = z clear on error
+;;; 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	_wrcmd0 'X'
 
 _nobusy:

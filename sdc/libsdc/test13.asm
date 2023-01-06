@@ -57,7 +57,7 @@ loop1@:
 	cmpa #'A'
 	blt next@
 	cmpa #'Z'
-	blt next@
+	bgt next@
 	ora #32
 	sta b,u
 next@:
@@ -65,7 +65,7 @@ next@:
 	bne loop1@
 	leau 32,u
 	cmpu #$05ff
-	bne loop0@:
+	bne loop0@
 	rts
 
 pass:	.ascii "OK"
@@ -75,5 +75,6 @@ fail:	.ascii "ERROR"
 msg1:	.asciz "ENABLE "
 msg2:	.asciz "DISABLE "
 msg3:	.asciz "LSEC RX "
+msg4:	.asciz "LSEC TX "
 	
 	endsection

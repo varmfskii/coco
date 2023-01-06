@@ -1,39 +1,55 @@
-	include "decb.asm"
-	include "sdc.asm"
+	include decb.asm
+	include libsdc/libsdc_h.asm
 
-buffer:	equ $7d00
-msgbuf:	equ buffer+$0100
+start	export
+buffer:	equ DBUF0
+msgbuf:	equ DBUF1
 
-	org msgbuf+$0010
-
-initmsg@:
-	.ascii "INITIATE DIRECTORY LISTING: FAILED"
-	fcb cr,0
-blkmsg@:
-	.ascii "DIRECTORY PAGE: FAILED"
-	fcb cr,0
-initdir@:
-	.asciz "L:*.GFX"
+	section code
+pattern:
+	.asciz "*.GFX"
 start:
-	lda #sdc_exd_cmd
-	ldu #initdir@
-	lbsr CommSDC
-	bcs initerror@
+	lbsr sdc_enable
+	bne enable_err
+	leau pattern,pcr
+	lbsr sdc_dir_init
+	bne init_err
 readlp:
-	ldd #sdc_ex_cmd*$0100+$3e
 	ldu #buffer
-	lbsr CommSDC
-	bcs blkerror@
+	lbsr sdc_dir_page
+	bne blk_err
 	bsr writeEntries
 	lda $f0,u
 	bne readlp
+	lbsr sdc_disable
+	bne disable_err
 	rts
-initerror@:
-	ldx #initmsg@
+
+;;; error handling
+enable_err:
+	leax enable_msg,pcr
 	bra wrtmsg
-blkerror@:
-	ldx #blkmsg@
+enable_msg:
+	.ascii "ENABLE FAILED"
+	fcb cr,0
+init_err:
+	leax init_msg,pcr
 	bra wrtmsg
+init_msg:
+	.ascii "DIR INIT FAILED"
+	fcb cr,0
+blk_err:
+	leax blk_msg,pcr
+	bra wrtmsg
+blk_msg:
+	.ascii "READ DIR BLOCK FAILED"
+	fcb cr,0
+disable_err:
+	leax disable_msg,pcr
+	bra wrtmsg
+disable_msg:
+	.ascii "DISABLE FAILED"
+	fcb cr,0
 	
 wrtmsg:
 	pshs x,a
@@ -82,6 +98,6 @@ bwd@:
 	beq bwd@
 	leax 1,x
 	rts
-
-	include commsdc.asm
 	end start
+	endsection
+	
