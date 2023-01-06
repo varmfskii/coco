@@ -1,4 +1,5 @@
-BINS=test1.bin test2.bin test3.bin test4.bin test5.bin test6.bin
+BINS=test1.bin test2.bin test3.bin test4.bin test5.bin test6.bin test7.bin \
+	test8.bin test9.bin test10.bin test11.bin test12.bin
 
 all: libsdc.o
 
@@ -21,7 +22,7 @@ test.dsk: $(BINS)
 .SECONDARY:
 
 clean:
-	rm -f *~ *.o *.txt $(BINS)
+	rm -f *~ test?.o *.txt $(BINS)
 
 distclean: clean
 	rm -f test.dsk

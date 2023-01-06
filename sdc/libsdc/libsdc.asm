@@ -97,13 +97,14 @@ sdc_str_start:
 ;;; A = status
 ;;; CC = z clear on error
 	pshs b
+	ora #sdc_stream
 	stb -1,y
 	stx ,y
 	tfr a,b
 	lbsr _nobusy
 	bne return@
-	orb #sdc_stream
 	stb -2,y
+	bita #sdc_failed
 return@:
 	puls b,pc
 
@@ -158,25 +159,25 @@ loop@:
 	bne loop@
 return@:
 	puls x,b,pc
-	
-_rdcmd0	macro
-	pshs b,x,u
-	ldd #\1*$0100+sdc_ex_cmd
-	bra _rxcmd
-	endm
-	
+
 _rdcmd1	macro
 	pshs b,x,u
-	lda \1
-	orb #sdc_ex_cmd
+	ldb #\1
 	bra _rxcmd
+	endm
+
+_rdcmd0	macro
+	clra
+	_rdcmd1 \1
 	endm
 
 _rxcmd:
 	std ,u
-	sta -1,y
+	stb -1,y
+	tfr a,b
 	lbsr _nobusy
 	bne return@
+	orb #sdc_ex_cmd
 	stb -2,y
 	lbsr _ready
 	bne return@
@@ -260,12 +261,13 @@ sdc_img_size:
 ;;;
 ;;; 	0-3	file size in sectors (big endian)
 	pshs b,u
-	ldb 'Q'
+	ora #sdc_ex_cmd	
+	ldb #'Q'
+	std ,u
 	stb -1,y
 	tfr a,b
 	lbsr _nobusy
 	bne return@
-	orb #sdc_ex_cmd
 	stb -2,y
 	lbsr _nobusy
 	bne return@
@@ -275,7 +277,8 @@ sdc_img_size:
 	stb ,u+
 	ldb 1,y
 	stb ,u+
-return@:
+	bita #sdc_failed
+return@:	
 	puls u,b,pc
 
 sdc_str_abort:
@@ -290,20 +293,19 @@ sdc_str_abort:
 	lbsr _nobusy
 	rts
 	
-_wrcmd0	macro
-	pshs b,x
-	ldd #sdc_exd_cmd*$0100+\1
-	bra _txcmd
-	endm
-	
 _wrcmd1	macro
 	pshs b,x
-	ora #sdc_exd_cmd
 	ldb #\1
 	bra _txcmd
 	endm
 	
+_wrcmd0	macro
+	clra
+	_wrcmd1 \1
+	endm
+	
 _txcmd:
+	ora #sdc_exd_cmd
 	sta -2,y
 	lbsr _ready
 	bne return@
