@@ -1,5 +1,5 @@
 	section code
-	include sdccmd_h.asm
+	include libsdc_h.asm
 	include decb.asm
 	export start
 start:
@@ -9,12 +9,19 @@ start:
 	lbsr sdc_enable
 	bne error
 	bsr ok
+	;; dir_get
+	ldx #msg3
+	bsr write
+	ldu #$0500
+	lbsr sdc_img_size
+	bne error
+	bsr ok
 	;; disable
 	ldx #msg2
 	bsr write
 	lbsr sdc_disable
 	bne error
-ok:
+ok:	
 	ldx #pass
 	bra write
 error:
@@ -32,5 +39,6 @@ fail:	.ascii "ERROR"
 	fcb cr,0
 msg1:	.asciz "ENABLE "
 msg2:	.asciz "DISABLE "
+msg3:	.asciz "IMG SIZE "
 	
 	endsection

@@ -1,5 +1,5 @@
-	ifndef _SDCCMD_H_
-_SDCCMD_H_:	equ 1
+	ifndef _LIBSDC_H_
+_LIBSDC_H_:	equ 1
 sdc_enable	import
 sdc_disable	import
 sdc_delete	import

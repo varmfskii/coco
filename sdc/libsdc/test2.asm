@@ -1,5 +1,5 @@
 	section code
-	include sdccmd_h.asm
+	include libsdc_h.asm
 	include decb.asm
 	export start
 start:

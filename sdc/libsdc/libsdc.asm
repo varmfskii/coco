@@ -33,26 +33,26 @@ sdc_str_sector	export
 sdc_str_start	export
 sdc_str_abort	export
 
-	section sdccmd
+	section libsdc
 	
-_sdc_old_y:
+_old_y:
 	fdb $0000
 
 sdc_enable:
 ;;; enable command mode
-	sty _sdc_old_y
+	sty _old_y
 	ldy #sdc_param1
 	lda #sdc_cmd_mode
 	sta -10,y
-	bsr _sdc_wait
+	lbsr _nobusy
 	rts
 
 sdc_disable:
 ;;; disable command mode
 	clr -10,y
-	bsr _sdc_wait
+	lbsr _nobusy
 	pshs cc
-	ldy _sdc_old_y
+	ldy _old_y
 	puls cc,pc
 
 sdc_lsec_rx:
@@ -71,11 +71,11 @@ sdc_lsec_rx:
 	stb -1,y
 	stx ,y
 	tfr a,b
-	bsr _sdc_wait
+	lbsr _nobusy
 	bne return@
 	orb #sdc_read
 	stb -2,y
-	bsr _sdc_wait
+	lbsr _ready
 	bne return@
 	ldb #256/2
 loop@:
@@ -100,7 +100,7 @@ sdc_str_start:
 	stb -1,y
 	stx ,y
 	tfr a,b
-	bsr _sdc_wait
+	lbsr _nobusy
 	bne return@
 	orb #sdc_stream
 	stb -2,y
@@ -118,19 +118,13 @@ sdc_str_sector:
 ;;; CC = z clear on error
 	pshs b,x
 	clrb
-loop0@:
-	lda -2,y
-	bita #sdc_failed
+	lbsr _ready
 	bne return@
-	bita #sdc_busy
-	beq return@
-	bita #sdc_ready
-	bne loop0@
-loop1@:
+loop@:
 	ldx ,y
 	stx ,u++
 	decb
-	bne loop1@
+	bne loop@
 return@:
 	puls x,b,pc
 
@@ -150,11 +144,11 @@ sdc_lsec_tx:
 	stb -1,y
 	stx ,y
 	tfr a,b
-	bsr _sdc_wait
+	lbsr _nobusy
 	bne return@
 	orb #sdc_write
 	stb -2,y
-	bsr _sdc_wait
+	lbsr _ready
 	bne return@
 	ldb #256/2
 loop@:
@@ -165,37 +159,26 @@ loop@:
 return@:
 	puls x,b,pc
 	
-_sdc_wait:
-;;; wait for busy to clear
-	lda -2,y
-	bita #sdc_failed
-	bne return@
-	bita #sdc_busy
-	bne _sdc_wait
-return@:
-	rts
-
-rdcmd0	macro
+_rdcmd0	macro
 	pshs b,x,u
 	ldd #\1*$0100+sdc_ex_cmd
-	bra rxcmd
+	bra _rxcmd
 	endm
 	
-rdcmd1	macro
+_rdcmd1	macro
 	pshs b,x,u
 	lda \1
 	orb #sdc_ex_cmd
-	bra rxcmd
+	bra _rxcmd
 	endm
 
-rxcmd:
+_rxcmd:
 	std ,u
 	sta -1,y
-	bsr _sdc_wait
+	lbsr _nobusy
 	bne return@
 	stb -2,y
-	bsr _sdc_wait
-	bra return@
+	lbsr _ready
 	bne return@
 	ldb #256/2
 loop@:
@@ -223,7 +206,7 @@ sdc_dir_page:
 ;;; 		$02	hidden
 ;;; 		$01	locked
 ;;; 	12-15	size in bytes (big endian)
-	rdcmd0 '>'
+	_rdcmd0 '>'
 
 sdc_dir_get:
 ;;; $43 - Get current directory
@@ -239,7 +222,7 @@ sdc_dir_get:
 ;;; 	8-10	extension
 ;;; 	11-31	private
 ;;; 	32-255	reserved
-	rdcmd0 'C'
+	_rdcmd0 'C'
 
 sdc_img_info:
 ;;; $49 - Get info for mounted image
@@ -262,7 +245,7 @@ sdc_img_info:
 ;;; 	12-27	reserved
 ;;; 	28-31	file size in bytes (little endian)
 ;;; 	32-255	reserved
-	rdcmd1 'I'
+	_rdcmd1 'I'
 
 sdc_img_size:
 ;;; $51 - Query size of a DSK image (256-byte sectors)
@@ -280,11 +263,11 @@ sdc_img_size:
 	ldb 'Q'
 	stb -1,y
 	tfr a,b
-	bsr _sdc_wait
+	lbsr _nobusy
 	bne return@
 	orb #sdc_ex_cmd
 	stb -2,y
-	bsr _sdc_wait
+	lbsr _nobusy
 	bne return@
 	ldb -1,y
 	stb ,u+
@@ -304,25 +287,25 @@ sdc_str_abort:
 ;;; CC = z clear on error
 	lda #sdc_abort
 	sta -2,y
-	bsr _sdc_wait
+	lbsr _nobusy
 	rts
 	
-wrtcmd0	macro
+_wrcmd0	macro
 	pshs b,x
 	ldd #sdc_exd_cmd*$0100+\1
-	bra cmdarg
+	bra _txcmd
 	endm
 	
-wrtcmd1	macro
+_wrcmd1	macro
 	pshs b,x
 	ora #sdc_exd_cmd
 	ldb #\1
-	bra cmdarg
+	bra _txcmd
 	endm
 	
-cmdarg:
+_txcmd:
 	sta -2,y
-	bsr _sdc_wait
+	lbsr _ready
 	bne return@
 	stb ,y
 	ldb #':'
@@ -333,7 +316,7 @@ loop@:
 	stx ,y
 	decb
 	bne loop@
-	bsr _sdc_wait
+	lbsr _nobusy
 return@:
 	puls x,b,pc
 
@@ -345,7 +328,7 @@ sdc_dir_set:
 ;;;
 ;;; A = status
 ;;; CC = z clear on errorM
-	wrtcmd0 'D'
+	_wrcmd0 'D'
 
 sdc_dir_make:
 ;;; $4b - Create new directory
@@ -355,7 +338,7 @@ sdc_dir_make:
 ;;;
 ;;; A = status
 ;;; CC = z clear on error
-	wrtcmd0 'K'
+	_wrcmd0 'K'
 
 sdc_dir_init:
 ;;; $4c - Initiate directory listing (followed by calls to Cirectory page)
@@ -365,7 +348,7 @@ sdc_dir_init:
 ;;;
 ;;; A = status
 ;;; CC = z clear on error
-	wrtcmd0 'L'
+	_wrcmd0 'L'
 
 sdc_img_mount:
 ;;; $4d - Mount image
@@ -376,7 +359,7 @@ sdc_img_mount:
 ;;;
 ;;; A = status
 ;;; CC = z clear on error
-	wrtcmd1 'M'
+	_wrcmd1 'M'
 
 sdc_img_new:
 ;;; $4e - Mount new image
@@ -387,7 +370,7 @@ sdc_img_new:
 ;;;
 ;;; A = status
 ;;; CC = z clear on error
-	wrtcmd1 'N'
+	_wrcmd1 'N'
 
 sdc_delete:
 ;;; $58 - Delete file or directory
@@ -397,6 +380,24 @@ sdc_delete:
 ;;;
 ;;; A = status
 ;;; CC = z clear on error
-	wrtcmd0 'X'
+	_wrcmd0 'X'
 
+_nobusy:
+;;; wait for busy to clear
+	lda -2,y
+	bita #sdc_failed
+	bne return@
+	bita #sdc_busy
+	bne _nobusy
+return@:
+	rts
+
+_ready:	
+;;; wait for ready
+	lda -2,y
+	bita #sdc_failed|sdc_ready
+	beq _ready
+	bita #sdc_failed
+	rts
+	
 	endsection
