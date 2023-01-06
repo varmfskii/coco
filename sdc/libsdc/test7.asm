@@ -9,12 +9,26 @@ start:
 	lbsr sdc_enable
 	bne error
 	bsr ok
-	;; img_info
+	;; stream start
 	ldx #msg3
 	bsr write
-	ldu #$0500
-	clra
-	lbsr sdc_img_info
+	clra			; drive 0
+	clrb			; image is smaller than 128k sectors
+	ldx #(17*18+2)/2	; sector 3 track 17 (first sector of dir)
+	lbsr sdc_str_start
+	bne error
+	bsr ok
+	;; str sector
+	ldx #msg4
+	bsr write
+	ldu #$0400
+	lbsr sdc_str_sector
+	bne error
+	bsr ok
+	;; str abort
+	ldx #msg5
+	bsr write
+	lbsr sdc_str_abort
 	bne error
 	bsr ok
 	;; disable
@@ -40,6 +54,8 @@ fail:	.ascii "ERROR"
 	fcb cr,0
 msg1:	.asciz "ENABLE "
 msg2:	.asciz "DISABLE "
-msg3:	.asciz "IMAGE INFO "
+msg3:	.asciz "STR START "
+msg4:	.asciz "STR SECTOR "
+msg5:	.asciz "STR ABORT "
 	
 	endsection

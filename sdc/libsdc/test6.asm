@@ -9,12 +9,14 @@ start:
 	lbsr sdc_enable
 	bne error
 	bsr ok
-	;; img_info
+	;; lsec rx
 	ldx #msg3
 	bsr write
 	ldu #$0500
-	clra
-	lbsr sdc_img_info
+	clra			; drive 0
+	clrb			; image is smaller than 64k sectors
+	ldx #17*18+2		; sector 3 track 17 (first sector of dir)
+	lbsr sdc_lsec_rx
 	bne error
 	bsr ok
 	;; disable
@@ -40,6 +42,6 @@ fail:	.ascii "ERROR"
 	fcb cr,0
 msg1:	.asciz "ENABLE "
 msg2:	.asciz "DISABLE "
-msg3:	.asciz "IMAGE INFO "
+msg3:	.asciz "LSEC RX "
 	
 	endsection

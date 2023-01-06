@@ -9,10 +9,11 @@ start:
 	lbsr sdc_enable
 	bne error
 	bsr ok
-	;; dir_get
+	;; img size
 	ldx #msg3
 	bsr write
 	ldu #$0500
+	clra
 	lbsr sdc_img_size
 	bne error
 	bsr ok
