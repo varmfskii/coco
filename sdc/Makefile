@@ -8,14 +8,14 @@ all: getdir.dsk
 %.txt: %.asm
 	lwasm --obj -o $(<:%.asm=%.o) $< --list=$@ --symbols
 
-getdir.dsk: GETDIR.BIN
+getdir.dsk: GETDIR8.BIN
 	decb dskini $@
-	decb copy -2b GETDIR.BIN $@,
+	decb copy -2b GETDIR8.BIN $@,
 
-GETDIR.BIN: getdir.o libsdc/libsdc.o
+GETDIR8.BIN: getdir.o libsdc/6809/libsdc.o
 	lwlink --decb --entry=start -o $@ $^
 
-libsdc/libsdc.o: libsdc
+libsdc/6809/libsdc.o: libsdc
 	make -C libsdc
 
 .PHONY: clean distclean all

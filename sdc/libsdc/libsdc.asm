@@ -45,13 +45,13 @@ sdc_enable:
 	ldy #sdc_param1
 	lda #sdc_cmd_mode
 	sta -10,y
-	bsr _nobusy
+	lbsr _nobusy
 	rts
 
 sdc_disable:
 ;;; disable command mode
 	clr -10,y
-	bsr _nobusy
+	lbsr _nobusy
 	pshs cc
 	ldy _old_y
 	puls cc,pc
@@ -76,25 +76,49 @@ sdc_lsec_rx:
 	stb -1,y
 	stx ,y
 	tfr a,b
-	bsr _nobusy
+	lbsr _nobusy
 	bne return@
+	IFDEF h6309
+	orb #sdc_read|$04
+	ELSE
 	orb #sdc_read
+	ENDC
 	stb -2,y
-	bsr _ready
+	lbsr _ready
 	bne return@
 	IFDEF h6309
 	pshsw
 	ldw #256
+	leay 1,y
 	tfm y,u+
+	leay -1,y
 	pulsw
 	ELSE
-	ldb #256/2
+	ldb #256/16
+	leau 8,u
 loop@:
 	ldx ,y
-	stx ,u++
+	stx -8,u
+	ldx ,y
+	stx -6,u
+	ldx ,y
+	stx -4,u
+	ldx ,y
+	stx -2,u
+	ldx ,y
+	stx ,u
+	ldx ,y
+	stx 2,u
+	ldx ,y
+	stx 4,u
+	ldx ,y
+	stx 6,u
+	leau 16,u
 	decb
 	bne loop@
+	leau -8,u
 	ENDC
+	clrb	
 return@:
 	puls x,b,pc
 
@@ -113,7 +137,11 @@ sdc_str_start:
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	pshs b
+	IFDEF h6309
+	ora #sdc_stream|$04
+	ELSE
 	ora #sdc_stream
+	ENDC
 	stb -1,y
 	stx ,y
 	tfr a,b
@@ -143,8 +171,11 @@ sdc_str_sector:
 	IFDEF h6309
 	pshsw
 	ldw #512
+	leay 1,y
 	tfm y,u+
+	leay -1,y
 	pulsw
+	clrb
 	ELSE
 	clrb
 loop@:
@@ -183,19 +214,30 @@ sdc_lsec_tx:
 	stb -2,y
 	bsr _ready
 	bne return@
-	IFDEF h6309
-	pshsw
-	ldw #256
-	tfm y,u+
-	pulsw
-	ELSE
-	ldb #256/2
+	ldb #256/16
+	leau 8,u
 loop@:
-	ldx ,u++
+	ldx -8,u
 	stx ,y
+	ldx -6,u
+	stx ,y
+	ldx -4,u
+	stx ,y
+	ldx -2,u
+	stx ,y
+	ldx ,u
+	stx ,y
+	ldx 2,u
+	stx ,y
+	ldx 4,u
+	stx ,y
+	ldx 6,u
+	stx ,y
+	leau 16,u
 	decb
 	bne loop@
-	ENDC
+	leau -8,u
+	clrb
 return@:
 	puls x,b,pc
 
@@ -238,19 +280,30 @@ _rxcmd:
 	stb -2,y
 	bsr _ready
 	bne return@
-	IFDEF h6309
-	pshsw
-	ldw #256
-	tfm y,u+
-	pulsw
-	ELSE
-	ldb #256/2
+	ldb #256/16
+	leau 8,u
 loop@:
 	ldx ,y
-	stx ,u++
+	stx -8,u
+	ldx ,y
+	stx -6,u
+	ldx ,y
+	stx -4,u
+	ldx ,y
+	stx -2,u
+	ldx ,y
+	stx ,u
+	ldx ,y
+	stx 2,u
+	ldx ,y
+	stx 4,u
+	ldx ,y
+	stx 6,u
+	leau 16,u
 	decb
 	bne loop@
-	ENDC
+	leau -8,u
+	clrb
 return@:
 	puls u,x,b,pc
 
@@ -374,7 +427,7 @@ sdc_str_abort:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	lda #sdc_abort
 	sta -2,y
-	bsr _nobusy
+	lbsr _nobusy
 	rts
 	
 _wrcmd1	macro
@@ -391,24 +444,34 @@ _wrcmd0	macro
 _txcmd:
 	ora #sdc_exd_cmd
 	sta -2,y
-	bsr _ready
+	lbsr _ready
 	bne return@
-	stb ,y
+	tfr b,a
 	ldb #':'
-	stb 1,y
-	IFDEF h6309
-	pshsw
-	ldw #254
-	tfm y,u+
-	pulsw
-	ELSE
-	ldb #254/2
+	tfr d,x
+	ldb #256/16
+	leau 8,u
 loop@:
-	ldx ,u++
 	stx ,y
+	ldx -8,u
+	stx ,y
+	ldx -6,u
+	stx ,y
+	ldx -4,u
+	stx ,y
+	ldx -2,u
+	stx ,y
+	ldx ,u
+	stx ,y
+	ldx 2,u
+	stx ,y
+	ldx 4,u
+	stx ,y
+	ldx 6,u
+	leau 16,u
 	decb
 	bne loop@
-	ENDC
+	leau -8,u
 	lbsr _nobusy
 return@:
 	puls x,b,pc
