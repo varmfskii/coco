@@ -3,6 +3,13 @@
 	include decb.asm
 	export start
 start:
+	ifdef h6309
+	ldmd #1
+	bsr _start
+	ldmd #0
+	rts
+_start:	
+	endc
 	;; enable
 	ldx #msg1
 	bsr write

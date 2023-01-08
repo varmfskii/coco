@@ -45,13 +45,13 @@ sdc_enable:
 	ldy #sdc_param1
 	lda #sdc_cmd_mode
 	sta -10,y
-	lbsr _nobusy
+	bsr _nobusy
 	rts
 
 sdc_disable:
 ;;; disable command mode
 	clr -10,y
-	lbsr _nobusy
+	bsr _nobusy
 	pshs cc
 	ldy _old_y
 	puls cc,pc
@@ -76,18 +76,25 @@ sdc_lsec_rx:
 	stb -1,y
 	stx ,y
 	tfr a,b
-	lbsr _nobusy
+	bsr _nobusy
 	bne return@
 	orb #sdc_read
 	stb -2,y
-	lbsr _ready
+	bsr _ready
 	bne return@
+	IFDEF h6309
+	pshsw
+	ldw #256
+	tfm y,u+
+	pulsw
+	ELSE
 	ldb #256/2
 loop@:
 	ldx ,y
 	stx ,u++
 	decb
 	bne loop@
+	ENDC
 return@:
 	puls x,b,pc
 
@@ -110,7 +117,7 @@ sdc_str_start:
 	stb -1,y
 	stx ,y
 	tfr a,b
-	lbsr _nobusy
+	bsr _nobusy
 	bne return@
 	stb -2,y
 	bita #sdc_failed
@@ -131,16 +138,24 @@ sdc_str_sector:
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	pshs b,x
-	clrb
-	lbsr _ready
+	bsr _ready
 	bne return@
+	IFDEF h6309
+	pshsw
+	ldw #512
+	tfm y,u+
+	pulsw
+	ELSE
+	clrb
 loop@:
 	ldx ,y
 	stx ,u++
 	decb
 	bne loop@
+	ENDC
 return@:
 	puls x,b,pc
+	
 
 sdc_lsec_tx:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -162,20 +177,45 @@ sdc_lsec_tx:
 	stb -1,y
 	stx ,y
 	tfr a,b
-	lbsr _nobusy
+	bsr _nobusy
 	bne return@
 	orb #sdc_write
 	stb -2,y
-	lbsr _ready
+	bsr _ready
 	bne return@
+	IFDEF h6309
+	pshsw
+	ldw #256
+	tfm y,u+
+	pulsw
+	ELSE
 	ldb #256/2
 loop@:
 	ldx ,u++
 	stx ,y
 	decb
 	bne loop@
+	ENDC
 return@:
 	puls x,b,pc
+
+_nobusy:
+;;; wait for busy to clear
+	lda -2,y
+	bita #sdc_failed
+	bne return@
+	bita #sdc_busy
+	bne _nobusy
+return@:
+	rts
+
+_ready:	
+;;; wait for ready
+	lda -2,y
+	bita #sdc_failed|sdc_ready
+	beq _ready
+	bita #sdc_failed
+	rts
 
 _rdcmd1	macro
 	pshs b,x,u
@@ -192,18 +232,25 @@ _rxcmd:
 	std ,u
 	stb -1,y
 	tfr a,b
-	lbsr _nobusy
+	bsr _nobusy
 	bne return@
 	orb #sdc_ex_cmd
 	stb -2,y
-	lbsr _ready
+	bsr _ready
 	bne return@
+	IFDEF h6309
+	pshsw
+	ldw #256
+	tfm y,u+
+	pulsw
+	ELSE
 	ldb #256/2
 loop@:
 	ldx ,y
 	stx ,u++
 	decb
 	bne loop@
+	ENDC
 return@:
 	puls u,x,b,pc
 
@@ -293,26 +340,26 @@ sdc_img_size:
 ;;; 	0-3	file size in sectors (big endian)
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	pshs b,u
+	pshs b
 	ora #sdc_ex_cmd	
 	ldb #'Q'
 	std ,u
 	stb -1,y
 	tfr a,b
-	lbsr _nobusy
+	bsr _nobusy
 	bne return@
 	stb -2,y
-	lbsr _nobusy
+	bsr _nobusy
 	bne return@
 	ldb -1,y
-	stb ,u+
+	stb ,u
 	ldb ,y
-	stb ,u+
+	stb 1,u
 	ldb 1,y
-	stb ,u+
+	stb 2,u
 	bita #sdc_failed
 return@:	
-	puls u,b,pc
+	puls b,pc
 
 sdc_str_abort:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -327,7 +374,7 @@ sdc_str_abort:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	lda #sdc_abort
 	sta -2,y
-	lbsr _nobusy
+	bsr _nobusy
 	rts
 	
 _wrcmd1	macro
@@ -344,17 +391,24 @@ _wrcmd0	macro
 _txcmd:
 	ora #sdc_exd_cmd
 	sta -2,y
-	lbsr _ready
+	bsr _ready
 	bne return@
 	stb ,y
 	ldb #':'
 	stb 1,y
+	IFDEF h6309
+	pshsw
+	ldw #254
+	tfm y,u+
+	pulsw
+	ELSE
 	ldb #254/2
 loop@:
 	ldx ,u++
 	stx ,y
 	decb
 	bne loop@
+	ENDC
 	lbsr _nobusy
 return@:
 	puls x,b,pc
@@ -444,23 +498,5 @@ sdc_delete:
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	_wrcmd0 'X'
-
-_nobusy:
-;;; wait for busy to clear
-	lda -2,y
-	bita #sdc_failed
-	bne return@
-	bita #sdc_busy
-	bne _nobusy
-return@:
-	rts
-
-_ready:	
-;;; wait for ready
-	lda -2,y
-	bita #sdc_failed|sdc_ready
-	beq _ready
-	bita #sdc_failed
-	rts
 	
 	endsection
