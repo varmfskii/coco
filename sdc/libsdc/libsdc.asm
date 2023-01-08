@@ -39,6 +39,173 @@ sdc_str_abort	export
 _old_y:
 	fdb $0000
 
+read256_3	macro		; 8-bits at a time using 6309
+	pshsw
+	ldw #256
+	leay 1,y
+	tfm y,u+
+	leay -1,y
+	pulsw
+	clrb
+	endm
+
+read256_8	macro		; 16-bits at at time
+	IFDEF SHORT
+	ldb #256/2
+loop@:
+	ldx ,y
+	stx ,u++
+	decb
+	bne loop@
+	ELSE
+	ldb #256/16
+	leau 8,u
+loop@:
+	ldx ,y
+	stx -8,u
+	ldx ,y
+	stx -6,u
+	ldx ,y
+	stx -4,u
+	ldx ,y
+	stx -2,u
+	ldx ,y
+	stx ,u
+	ldx ,y
+	stx 2,u
+	ldx ,y
+	stx 4,u
+	ldx ,y
+	stx 6,u
+	leau 16,u
+	decb
+	bne loop@
+	leau -8,u
+	clrb
+	ENDIF
+	endm
+
+read512_3  	macro		; h6309 8-bit reads
+	pshsw
+	ldw #512
+	leay 1,y
+	tfm y,u+
+	leay -1,y
+	pulsw
+	clrb
+	endm
+
+read512_8	macro		; 16-bit reads
+	IFDEF SHORT
+	clrb
+loop@:
+	ldx ,y
+	stx ,u++
+	decb
+	bne loop@
+	ELSE
+	ldb #512/16
+	leau 8,u
+loop@:
+	ldx ,y
+	stx -8,u
+	ldx ,y
+	stx -6,u
+	ldx ,y
+	stx -4,u
+	ldx ,y
+	stx -2,u
+	ldx ,y
+	stx ,u
+	ldx ,y
+	stx 2,u
+	ldx ,y
+	stx 4,u
+	ldx ,y
+	stx 6,u
+	leau 16,u
+	decb
+	bne loop@
+	leau -8,u
+	clrb
+	ENDIF
+	endm
+
+write254	macro
+	IFDEF short
+	stb ,y
+	ldb #':'
+	stb 1,y
+	ldb #254/2
+loop@:
+	ldx ,u+
+	stx ,y
+	ELSE
+	tfr b,a
+	ldb #':'
+	tfr d,x
+	ldb #256/16
+	leau 8,u
+loop@:
+	stx ,y
+	ldx -8,u
+	stx ,y
+	ldx -6,u
+	stx ,y
+	ldx -4,u
+	stx ,y
+	ldx -2,u
+	stx ,y
+	ldx ,u
+	stx ,y
+	ldx 2,u
+	stx ,y
+	ldx 4,u
+	stx ,y
+	ldx 6,u
+	leau 16,u
+	decb
+	bne loop@
+	leau -8,u
+	ENDC
+	endm
+
+write256	macro
+	IFDEF short
+	ldb #256/2
+loop@:
+	ldx ,u+
+	stx ,y
+	decb
+	bne loop@
+	ELSE
+	ldb #256/16
+	leau 8,u
+loop@:
+	ldx -8,u
+	stx ,y
+	ldx -6,u
+	stx ,y
+	ldx -4,u
+	stx ,y
+	ldx -2,u
+	stx ,y
+	ldx ,u
+	stx ,y
+	ldx 2,u
+	stx ,y
+	ldx 4,u
+	stx ,y
+	ldx 6,u
+	stx ,y
+	leau 16,u
+	decb
+	bne loop@
+	leau -8,u
+	clrb
+	ENDC
+	endm
+
 sdc_enable:
 ;;; enable command mode
 	sty _old_y
@@ -79,7 +246,7 @@ sdc_lsec_rx:
 	lbsr _nobusy
 	bne return@
 	IFDEF h6309
-	orb #sdc_read|$04
+	orb #sdc_read|$04	; 8-bit xfer
 	ELSE
 	orb #sdc_read
 	ENDC
@@ -87,36 +254,9 @@ sdc_lsec_rx:
 	lbsr _ready
 	bne return@
 	IFDEF h6309
-	pshsw
-	ldw #256
-	leay 1,y
-	tfm y,u+
-	leay -1,y
-	pulsw
+	read256_3
 	ELSE
-	ldb #256/16
-	leau 8,u
-loop@:
-	ldx ,y
-	stx -8,u
-	ldx ,y
-	stx -6,u
-	ldx ,y
-	stx -4,u
-	ldx ,y
-	stx -2,u
-	ldx ,y
-	stx ,u
-	ldx ,y
-	stx 2,u
-	ldx ,y
-	stx 4,u
-	ldx ,y
-	stx 6,u
-	leau 16,u
-	decb
-	bne loop@
-	leau -8,u
+	read256_8
 	ENDC
 	clrb	
 return@:
@@ -138,14 +278,14 @@ sdc_str_start:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	pshs b
 	IFDEF h6309
-	ora #sdc_stream|$04
+	ora #sdc_stream|$04	; 8-bit xfer
 	ELSE
 	ora #sdc_stream
 	ENDC
 	stb -1,y
 	stx ,y
 	tfr a,b
-	bsr _nobusy
+	lbsr _nobusy
 	bne return@
 	stb -2,y
 	bita #sdc_failed
@@ -169,20 +309,9 @@ sdc_str_sector:
 	bsr _ready
 	bne return@
 	IFDEF h6309
-	pshsw
-	ldw #512
-	leay 1,y
-	tfm y,u+
-	leay -1,y
-	pulsw
-	clrb
+	read512_3
 	ELSE
-	clrb
-loop@:
-	ldx ,y
-	stx ,u++
-	decb
-	bne loop@
+	read512_8
 	ENDC
 return@:
 	puls x,b,pc
@@ -214,30 +343,7 @@ sdc_lsec_tx:
 	stb -2,y
 	bsr _ready
 	bne return@
-	ldb #256/16
-	leau 8,u
-loop@:
-	ldx -8,u
-	stx ,y
-	ldx -6,u
-	stx ,y
-	ldx -4,u
-	stx ,y
-	ldx -2,u
-	stx ,y
-	ldx ,u
-	stx ,y
-	ldx 2,u
-	stx ,y
-	ldx 4,u
-	stx ,y
-	ldx 6,u
-	stx ,y
-	leau 16,u
-	decb
-	bne loop@
-	leau -8,u
-	clrb
+	write256
 return@:
 	puls x,b,pc
 
@@ -280,29 +386,7 @@ _rxcmd:
 	stb -2,y
 	bsr _ready
 	bne return@
-	ldb #256/16
-	leau 8,u
-loop@:
-	ldx ,y
-	stx -8,u
-	ldx ,y
-	stx -6,u
-	ldx ,y
-	stx -4,u
-	ldx ,y
-	stx -2,u
-	ldx ,y
-	stx ,u
-	ldx ,y
-	stx 2,u
-	ldx ,y
-	stx 4,u
-	ldx ,y
-	stx 6,u
-	leau 16,u
-	decb
-	bne loop@
-	leau -8,u
+	read256_8
 	clrb
 return@:
 	puls u,x,b,pc
@@ -446,32 +530,7 @@ _txcmd:
 	sta -2,y
 	lbsr _ready
 	bne return@
-	tfr b,a
-	ldb #':'
-	tfr d,x
-	ldb #256/16
-	leau 8,u
-loop@:
-	stx ,y
-	ldx -8,u
-	stx ,y
-	ldx -6,u
-	stx ,y
-	ldx -4,u
-	stx ,y
-	ldx -2,u
-	stx ,y
-	ldx ,u
-	stx ,y
-	ldx 2,u
-	stx ,y
-	ldx 4,u
-	stx ,y
-	ldx 6,u
-	leau 16,u
-	decb
-	bne loop@
-	leau -8,u
+	write254
 	lbsr _nobusy
 return@:
 	puls x,b,pc
