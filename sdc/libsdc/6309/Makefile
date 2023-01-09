@@ -10,13 +10,10 @@ all: $(TGTS)
 test: test.dsk
 
 %.o: ../%.asm
-	lwasm $(TGTOPTS) --obj -o $@ $<
-
-%.txt: ../%.asm
-	lwasm $(TGTOPTS) --obj -o $(<:%.asm=%.o) $< --list=$@ --symbols
+	lwasm $(TGTOPTS) --obj -o $@ $< --list=$(@:%.o=%.txt) --symbols
 
 %.bin: %.o libsdc.o
-	lwlink --decb --entry=start -o $@ $^
+	lwlink -b -s ../link.scr -o $@ $^
 
 test.dsk: $(BINS)
 	decb dskini $@

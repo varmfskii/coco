@@ -1,6 +1,6 @@
-	section code
 	include libsdc_h.asm
 	include decb.asm
+	section code
 	export start
 start:
 	ifdef h6309
@@ -39,5 +39,5 @@ fail:	.ascii "ERROR"
 	fcb cr,0
 msg1:	.asciz "ENABLE "
 msg2:	.asciz "DISABLE "
-	
 	endsection
+	end start
