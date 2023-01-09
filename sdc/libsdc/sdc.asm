@@ -1,5 +1,7 @@
 	ifndef _SDC_
 _SDC_:	equ 1
+	ifdef coco
+	include decb.asm
 	;; Hardware Addressing - CoCo Scheme
 sdc_ctrl_latch:	equ $FF40	; controller latch (write)
 sdc_cmd_reg:	equ $FF48	; command register (write)
@@ -7,6 +9,16 @@ sdc_stat_reg:	equ $FF48	; status register (read)
 sdc_param0:	equ $FF49	; param register 1
 sdc_param1:	equ $FF4A	; param register 2
 sdc_param2:	equ $FF4B	; param register 3
+	else
+	include ddos.asm
+	;; Hardware Addressing - Dragon Scheme
+sdc_cmd_reg:	equ $FF40	; command register (write)
+sdc_stat_reg:	equ $FF40	; status register (read)
+sdc_param0:	equ $FF41	; param register 1
+sdc_param1:	equ $FF42	; param register 2
+sdc_param2:	equ $FF43	; param register 3
+sdc_ctrl_latch:	equ $FF48	; controller latch (write)
+	endc
 	;; Status Register Masks
 sdc_busy:	equ %00000001	; set while a command is executing
 sdc_ready:	equ %00000010	; set when ready for a data transfer

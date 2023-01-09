@@ -3,7 +3,7 @@ BINS=test01.bin test02.bin test03.bin test04.bin test05.bin	\
 	test11.bin test12.bin test13.bin
 
 TGTS=libsdc.o
-TGTOPTS=-D m6809 --6809
+TGTOPTS=-D coco -D m6809 --6809
 
 all: $(TGTS)
 

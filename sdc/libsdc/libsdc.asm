@@ -13,7 +13,6 @@
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-	include decb.asm
 	include sdc.asm
 
 sdc_enable	export
@@ -211,16 +210,16 @@ sdc_enable:
 	sty _old_y
 	ldy #sdc_param1
 	lda #sdc_cmd_mode
-	sta -10,y
+	sta sdc_ctrl_latch
 	lbsr _nobusy
 	rts
 
 sdc_disable:
 ;;; disable command mode
-	clr -10,y
+	clr sdc_ctrl_latch
 	lbsr _nobusy
-	pshs cc
 	ldy _old_y
+	pshs cc
 	puls cc,pc
 
 sdc_lsec_rx:
