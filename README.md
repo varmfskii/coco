@@ -13,4 +13,5 @@ A tool for converting between DECB and DragonDos binary files (both ways)
 
 ## sdc
 
-An access library for the cocosdc (not working)
+CoCoSDC related code
+

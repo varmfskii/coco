@@ -13,6 +13,7 @@
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+	include coco.asm
 	include sdc.asm
 
 sdc_enable	export

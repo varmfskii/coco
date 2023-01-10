@@ -1,6 +1,7 @@
+;;; CoCoSDC defines
 	ifndef _SDC_
 _SDC_:	equ 1
-	ifdef coco
+	ifdef _COCO_
 	include decb.asm
 	;; Hardware Addressing - CoCo Scheme
 sdc_ctrl_latch:	equ $FF40	; controller latch (write)
