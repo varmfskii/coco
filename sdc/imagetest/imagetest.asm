@@ -3,7 +3,8 @@
 	include sdc.asm
 	include libsdc_h.asm
 screen:	equ $0e00
-
+frames:	equ 1
+	
 setscr	macro
 	sta SAM_f0+(\1&$0200)/$0200
 	sta SAM_f1+(\1&$0400)/$0400
@@ -85,7 +86,7 @@ loop@:
 	bne loop@
 
 	pshs a
-	ldb #60
+	ldb #frames
 loop@:
 	lda PIA_A+3
 	ora #$01

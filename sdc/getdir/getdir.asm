@@ -1,5 +1,5 @@
 	include decb.asm
-	include libsdc/libsdc_h.asm
+	include libsdc_h.asm
 
 start	export
 buffer:	equ DBUF0
@@ -9,6 +9,9 @@ msgbuf:	equ DBUF1
 pattern:
 	.asciz "*.GFX"
 start:
+	ifdef h6309
+	ldmd #1
+	endif
 	lbsr sdc_enable
 	bne enable_err
 	leau pattern,pcr
@@ -23,6 +26,9 @@ readlp:
 	bne readlp
 	lbsr sdc_disable
 	bne disable_err
+	ifdef h6309
+	ldmd #0
+	endif
 	rts
 
 ;;; error handling
