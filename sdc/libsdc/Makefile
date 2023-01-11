@@ -27,15 +27,15 @@ test6809.dsk: 6809/test.dsk
 6809/test.dsk:
 	make -C 6809 test.dsk
 
-install: $(INCDIR)/libsdc_h.asm $(ARCS:%=$(LIBDIR)/%/libsdc.ar)
+install: $(INCDIR)/libsdc_h.asm $(ARCS:%=$(LIBDIR)/%/libsdc.a)
 
 $(INCDIR)/libsdc_h.asm: libsdc_h.asm
 	cp $^ $@
 
-$(LIBDIR)/6309/libsdc.ar: 6309/libsdc.o
+$(LIBDIR)/6309/libsdc.a: 6309/libsdc.o
 	make -C 6309 install
 
-$(LIBDIR)/6809/libsdc.ar: 6809/libsdc.o
+$(LIBDIR)/6809/libsdc.a: 6809/libsdc.o
 	make -C 6809 install
 
 .PHONY: clean distclean all test install

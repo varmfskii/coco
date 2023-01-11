@@ -1,0 +1,4 @@
+entry start
+section code load 7800
+section *
+
