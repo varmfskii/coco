@@ -239,7 +239,7 @@ sdc_lsec_rx:
 ;;; CC = z clear on error
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	pshs b,x
+	pshs x,b
 	stb -1,y
 	stx ,y
 	tfr a,b
@@ -260,7 +260,7 @@ sdc_lsec_rx:
 	ENDC
 	clrb	
 return@:
-	puls x,b,pc
+	puls b,x,pc
 
 sdc_str_start:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -305,7 +305,7 @@ sdc_str_sector:
 ;;; CC = z clear on error
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	pshs b,x
+	pshs x,b
 	bsr _ready
 	bne return@
 	IFDEF h6309
@@ -314,7 +314,7 @@ sdc_str_sector:
 	read512_8
 	ENDC
 return@:
-	puls x,b,pc
+	puls b,x,pc
 	
 
 sdc_lsec_tx:
@@ -333,7 +333,7 @@ sdc_lsec_tx:
 ;;; CC = z clear on error
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-	pshs b,x
+	pshs x,b
 	stb -1,y
 	stx ,y
 	tfr a,b
@@ -345,7 +345,7 @@ sdc_lsec_tx:
 	bne return@
 	write256
 return@:
-	puls x,b,pc
+	puls b,x,pc
 
 _nobusy:
 ;;; wait for busy to clear
@@ -366,7 +366,7 @@ _ready:
 	rts
 
 _rdcmd1	macro
-	pshs b,x,u
+	pshs u,x,b
 	ldb #\1
 	bra _rxcmd
 	endm
@@ -389,7 +389,7 @@ _rxcmd:
 	read256_8
 	clrb
 return@:
-	puls u,x,b,pc
+	puls b,x,u,pc
 
 sdc_dir_page:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -511,11 +511,13 @@ sdc_str_abort:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	lda #sdc_abort
 	sta -2,y
+	pshs u,y,x,b,a
+	puls a,b,x,y,u
 	lbsr _nobusy
 	rts
 	
 _wrcmd1	macro
-	pshs b,x
+	pshs x,b
 	ldb #\1
 	bra _txcmd
 	endm
@@ -533,7 +535,7 @@ _txcmd:
 	write254
 	lbsr _nobusy
 return@:
-	puls x,b,pc
+	puls b,x,pc
 
 sdc_dir_set:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

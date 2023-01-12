@@ -3,8 +3,9 @@
 	include sdc.asm
 	include libsdc_h.asm
 screen:	equ $0e00
-frames:	equ 1
-	
+frames:	equ 60-2 			; approximately 1 second
+
+	;; set start address of VDG screen
 setscr	macro
 	sta SAM_f0+(\1&$0200)/$0200
 	sta SAM_f1+(\1&$0400)/$0400
@@ -17,19 +18,16 @@ setscr	macro
 	
 	section code
 	export start
-count:	fcb 14
-curradd:	fdb screen
-	
+	ifdef images		; rely on counter
+count:	fcb images		* counter for images per file
+	endc			; end
+
 start:
-	pshs cc
-	orcc #$c0
-	ifdef h6309
-	ldmd #1
-	endc
-	;; pshs dp
-	;; lda #$ff
-	;; pshs a
-	;; puls dp
+	pshs cc			; preserve cc
+	orcc #$c0		; mask interrupts
+	ifdef h6309		; h6309
+	ldmd #1			* native mode
+	endc			; end
 	;; G6R
 	lda VDG
 	anda #$07
@@ -42,52 +40,69 @@ start:
 	sta SAM_v0		; v0 clear
 	;; $0e00
 	setscr screen
-	;; puls dp
 	lbsr sdc_enable
 	lbne error
-	clra
 
-loop@:
-	ldu #screen
-	bsr read_screen
-	setscr screen
-	ldu #screen+$1800
-	bsr read_screen
-	setscr screen+$1800
-	bra loop@
-
-read_screen:
-	;; start at beginning of file if stream not active. Works
-	;; initially, but not when attempting to restart
-	bita #sdc_busy
-	bne skip@
-	stu curradd
-	leau null,pcr
-	lda #1
-	lbsr sdc_img_mount
-	bne error
+loopo@:
+	ifdef images		; rely on counter
+	lda #images		*
+	sta count		*
+	endc			; end
 	leau imagename,pcr
 	lda #1
 	lbsr sdc_img_mount
 	bne error
+	lda count
+	beq error
 	ldd #$0100
 	ldx #$0000
 	lbsr sdc_str_start
 	bne error
-	ldu curradd
-skip@:
-
+loopi@:
+	ldu #screen
+	bsr read_screen
+	setscr screen
+	lda -2,y
+	bita #sdc_busy
+	beq loopo@
+	ifdef images		; rely on counter
+	dec count		*
+	beq exit@		*
+	endc			; end
+	ldu #screen+$1800
+	bsr read_screen
+	setscr screen+$1800
+	lda -2,y
+	bita #sdc_busy
+	beq loopo@
+	ifdef images		; rely on counter
+	dec count		*
+	bne loopi@		*
+exit@:				*
+	lbsr sdc_str_abort	*
+	bne error		*
+	bra loopo@		*
+	else			; else
+	bra loopi@		*
+	endc			; end
+	
+	;; stream a screen (6k) to the address in u
+	;; then wait for frames vsync
+	;; does not check for end of file
+read_screen:
 	;; read loop
-	ldb #12
+	ldb #6144/512
 loop@:
 	lbsr sdc_str_sector
 	bne error
 	decb
 	bne loop@
 
+	;; wait frames
 	pshs a
 	ldb #frames
 loop@:
+	;; enable/acknowledge vsync interrupt
 	lda PIA_A+3
 	ora #$01
 	sta PIA_A+3
@@ -96,8 +111,7 @@ loop@:
 	bne loop@
 	puls a,pc
 
-error2:
-	leas 2,s
+	;; on error print hexvalue in a and exit
 error:
 	puls cc
 	pshs a
@@ -118,6 +132,7 @@ error:
 	endc
 	rts
 
+	;; write hex value in a
 wr_hex:	
 	ora #'0'
 	cmpa #'9'
