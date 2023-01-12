@@ -52,8 +52,6 @@ loopo@:
 	lda #1
 	lbsr sdc_img_mount
 	bne error
-	lda count
-	beq error
 	ldd #$0100
 	ldx #$0000
 	lbsr sdc_str_start
@@ -62,7 +60,6 @@ loopi@:
 	ldu #screen
 	bsr read_screen
 	setscr screen
-	lda -2,y
 	bita #sdc_busy
 	beq loopo@
 	ifdef images		; rely on counter
@@ -72,7 +69,6 @@ loopi@:
 	ldu #screen+$1800
 	bsr read_screen
 	setscr screen+$1800
-	lda -2,y
 	bita #sdc_busy
 	beq loopo@
 	ifdef images		; rely on counter

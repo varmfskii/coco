@@ -1,16 +1,17 @@
 PREFIX=../..
 INCDIR=$(PREFIX)/asm_inc
-
+LCLINC=sdc_dir.asm sdc_enable.asm sdc_img.asm sdc_lsec.asm	\
+	sdc_macros.asm sdc_str.asm
 ARCS=6309 6809
 TGTS=$(ARCS:%=%/libsdc.o)
 DSKS=$(ARCS:%=test%.dsk)
 
 all: $(TGTS)
 
-6309/libsdc.o: libsdc.asm
+6309/libsdc.o: libsdc.asm $(LCLINC)
 	make -C 6309 libsdc.o
 
-6809/libsdc.o: libsdc.asm
+6809/libsdc.o: libsdc.asm $(LCLINC)
 	make -C 6809 libsdc.o
 
 test: $(DSKS)
@@ -42,6 +43,7 @@ $(LIBDIR)/6809/libsdc.a: 6809/libsdc.o
 .SECONDARY:
 
 clean:
+	rm -f *~ *#
 	for t in $(ARCS);do make -C $$t $@;done
 
 distclean: clean
