@@ -28,18 +28,8 @@ start:
 	ifdef h6309		; h6309
 	ldmd #1			* native mode
 	endc			; end
-	;; G6R
-	lda VDG
-	anda #$07
-	;; G6R, css set
-	ora #$f8
-	sta VDG
-	;; v=%110 G6C/R
-	sta SAM_v2+1		; v2 set
-	sta SAM_v1+1		; v1 set
-	sta SAM_v0		; v0 clear
-	;; $0e00
-	setscr screen
+	leau welcome,pcr
+	lbsr writestr
 	lbsr sdc_enable
 	lbne error
 
@@ -48,7 +38,7 @@ loopo@:
 	lda #images		*
 	sta count		*
 	endc			; end
-	leau imagename,pcr
+	lbsr getname		; get name of next image
 	lda #1
 	lbsr sdc_img_mount
 	bne error
@@ -58,7 +48,8 @@ loopo@:
 	bne error
 loopi@:
 	ldu #screen
-	bsr read_screen
+	lbsr read_screen
+	bsr pmode4
 	setscr screen
 	bita #sdc_busy
 	beq loopo@
@@ -67,7 +58,8 @@ loopi@:
 	beq exit@		*
 	endc			; end
 	ldu #screen+$1800
-	bsr read_screen
+	lbsr read_screen
+	bsr pmode4
 	setscr screen+$1800
 	bita #sdc_busy
 	beq loopo@
@@ -82,31 +74,6 @@ exit@:				*
 	bra loopi@		*
 	endc			; end
 	
-	;; stream a screen (6k) to the address in u
-	;; then wait for frames vsync
-	;; does not check for end of file
-read_screen:
-	;; read loop
-	ldb #6144/512
-loop@:
-	lbsr sdc_str_sector
-	bne error
-	decb
-	bne loop@
-
-	;; wait frames
-	pshs a
-	ldb #frames
-loop@:
-	;; enable/acknowledge vsync interrupt
-	lda PIA_A+3
-	ora #$01
-	sta PIA_A+3
-	sync
-	decb
-	bne loop@
-	puls a,pc
-
 	;; on error print hexvalue in a and exit
 error:
 	puls cc
@@ -137,8 +104,75 @@ wr_hex:
 write@:
 	jsr [CHROUT]
 	rts
+
+pmode4:
+	pshs a
+	;; G6R
+	lda VDG
+	anda #$07
+	;; G6R, css set
+	ora #$f8
+	sta VDG
+	;; v=%110 G6C/R
+	sta SAM_v2+1		; v2 set
+	sta SAM_v1+1		; v1 set
+	sta SAM_v0		; v0 clear
+	puls a,pc
 	
-imagename:	.ascii "IMAGE000.PM4"
-null:	fcb 0
+	;; stream a screen (6k) to the address in u
+	;; then wait for frames vsync
+	;; does not check for end of file
+read_screen:
+	;; read loop
+	ldb #6144/512
+loop@:
+	lbsr sdc_str_sector
+	bne error
+	decb
+	bne loop@
+
+	;; wait frames
+	pshs a
+	ldb #frames
+loop@:
+	;; enable/acknowledge vsync interrupt
+	lda PIA_A+3
+	ora #$01
+	sta PIA_A+3
+	sync
+	decb
+	bne loop@
+	puls a,pc
+
+	;; return a pointer to the name of the next image in u
+getname:
+	ldu nextimage@,pcr
+	tst ,u
+	bne skip@
+	leau imagelist@,pcr
+skip@:
+	pshs u,a		; preserve actual return and a
+	;; set nextimage
+loop@:
+	lda ,u+
+	bne loop@
+	stu nextimage@
+	puls a,u,pc
+imagelist@:
+	includebin imagelist.bin
+nextimage@:	fdb imagelist@
+
+writestr:
+	lda ,u+
+	beq return@
+	jsr [CHROUT]
+	bra writestr
+return@:
+	rts
+	
+welcome:
+	.ascii "SLIDESHOW TEST FOR LIBSDC"
+	fcb cr,0
+	
 	endsection
 	end start

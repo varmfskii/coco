@@ -23,6 +23,12 @@ test: test.dsk
 %_6809.bin: %_6809.o
 	lwlink $(LINK6809) -b -s link.scr -o $@ $^
 
+imagetest_6309.o: imagetest.asm imagelist.bin
+imagetest_6809.o: imagetest.asm imagelist.bin
+
+imagelist.bin: imagelist.txt
+	./mklist.py $< $@
+
 imagetst.dsk: $(BINS)
 	decb dskini $@
 	decb copy -2b imagetest_6309.bin $@,IMGTST3.BIN
@@ -32,7 +38,7 @@ imagetst.dsk: $(BINS)
 .SECONDARY:
 
 clean:
-	rm -f *~ *.o *.txt $(BINS)
+	rm -f *~ *.o imagetest_6?09.txt $(BINS)
 
 distclean: clean
 	rm -f imgtst.dsk $(TGTS)
