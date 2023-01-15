@@ -1,8 +1,8 @@
 PREFIX=../..
 OPTS6309=-I$(PREFIX)/asm_inc -Dh6309 --6309
 OPTS6809=-I$(PREFIX)/asm_inc -Dm6809 --6809
-LINK6309=-L$(PREFIX)/asm_libs/6309 -lsdc
-LINK6809=-L$(PREFIX)/asm_libs/6809 -lsdc
+LINK6309=-L$(PREFIX)/asm_libs/6309 -lsdc -s link6309.scr
+LINK6809=-L$(PREFIX)/asm_libs/6809 -lsdc -s link.scr
 
 BINS=imagetest_6309.bin imagetest_6809.bin
 TGTS=imagetst.dsk
@@ -18,10 +18,10 @@ test: test.dsk
 	lwasm $(OPTS6809) --obj -o $@ $< --list=$(@:%.o=%.txt) --symbols
 
 %_6309.bin: %_6309.o
-	lwlink $(LINK6309) -b -s link.scr -o $@ $^
+	lwlink -b $(LINK6309) -o $@ $^
 
 %_6809.bin: %_6809.o
-	lwlink $(LINK6809) -b -s link.scr -o $@ $^
+	lwlink -b $(LINK6809) -o $@ $^
 
 imagetest_6309.o: imagetest.asm imagelist.bin
 imagetest_6809.o: imagetest.asm imagelist.bin

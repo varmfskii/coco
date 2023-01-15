@@ -9,7 +9,7 @@ BINS=test01.bin test02.bin test03.bin test04.bin test05.bin	\
 	test06.bin test07.bin test08.bin test09.bin test10.bin	\
 	test11.bin test12.bin test13.bin
 
-TGTS=libsdc.o
+TGTS=libsdc.a
 
 all: $(TGTS)
 
@@ -18,6 +18,9 @@ all: $(TGTS)
 
 %.bin: %.o libsdc.o
 	lwlink -b -s link.scr -o $@ $^
+
+libsdc.a: libsdc.o
+	lwar -c $@ $^
 
 libsdc.o: ../libsdc.asm $(LCLINC:%=../%)
 
@@ -32,11 +35,11 @@ test.dsk: $(BINS)
 
 install: $(LIBDIR)/libsdc.a
 
-$(LIBDIR)/libsdc.a: libsdc.o
-	lwar -c $@ $<
+$(LIBDIR)/libsdc.a: libsdc.a
+	cp $^ $@
 
 clean:
-	rm -f *~ test*.o *.txt $(BINS)
+	rm -f *~ libsdc.o test*.o *.txt $(BINS)
 
 distclean: clean
 	rm -f test.dsk $(TGTS)
