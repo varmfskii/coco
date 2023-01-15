@@ -36,7 +36,11 @@ sdc_str_start	export
 
 	include sdc_macros.asm
 	
+	ifdef h6309
+	section libsdc6309
+	else
 	section libsdc
+	endc
 	
 _old_y:
 	fdb $0000

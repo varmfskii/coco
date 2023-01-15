@@ -12,7 +12,7 @@ all: $(TGTS)
 	make -C 6309 libsdc.o
 
 6809/libsdc.o: libsdc.asm $(LCLINC)
-	make -C 6809 libsdc.o
+	make -C 6809 libsdc3.o
 
 test: $(DSKS)
 
@@ -28,9 +28,13 @@ test6809.dsk: 6809/test.dsk
 6809/test.dsk:
 	make -C 6809 test.dsk
 
-install: $(INCDIR)/libsdc_h.asm $(ARCS:%=$(LIBDIR)/%/libsdc.a)
+install: $(INCDIR)/libsdc_h.asm $(ARCS:%=$(LIBDIR)/%/libsdc.a) \
+	$(LIBDIR)/libsdc.a
 
 $(INCDIR)/libsdc_h.asm: libsdc_h.asm
+	cp $^ $@
+
+$(LIBDIR)/libsdc.a: libsdc.a
 	cp $^ $@
 
 $(LIBDIR)/6309/libsdc.a: 6309/libsdc.o
@@ -38,6 +42,9 @@ $(LIBDIR)/6309/libsdc.a: 6309/libsdc.o
 
 $(LIBDIR)/6809/libsdc.a: 6809/libsdc.o
 	make -C 6809 install
+
+libsdc.a: 6309/libsdc.o 6809/libsdc.o
+	lwar -c $@ $^
 
 .PHONY: clean distclean all test install
 .SECONDARY:

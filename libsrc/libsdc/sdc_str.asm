@@ -12,8 +12,11 @@ sdc_str_sector:
 ;;; 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	pshs x,b
+	lda -2,y
+	bita #sdc_busy
+	beq onerr@
 	bsr _ready
-	bne return@
+	bne onerr@
 	IFDEF h6309
 	read512_3
 	ELSE
@@ -21,9 +24,11 @@ sdc_str_sector:
 	ENDC
 	lda -2,y
 	bita #sdc_failed
-return@:
 	puls b,x,pc
-
+onerr@:
+	andcc #$fb
+	puls b,x,pc
+	
 sdc_str_abort:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; 
