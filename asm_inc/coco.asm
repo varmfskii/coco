@@ -19,8 +19,8 @@ SAM_f5:	equ SAM+$10		; screen address $4000
 SAM_f6:	equ SAM+$12		; screen address $8000
 SAM_p1:	equ SAM+$14		; page #1
 SAM_r0:	equ SAM+$16		; ROM fast control
-SLOW:	equ SAM_r0
-FAST:	equ SAM_r0+1
+SLOW:	set SAM_r0
+FAST:	set SAM_r0+1
 SAM_r1:	equ SAM+$18		; RAM fast control
 SAM_m0:	equ SAM+$1a		; memory size bit 0
 SAM_m1:	equ SAM+$1c		; memory size bit 1

@@ -38,7 +38,7 @@ imagetst.dsk: $(BINS)
 .SECONDARY:
 
 clean:
-	rm -f *~ *.o imagetest_6?09.txt $(BINS)
+	rm -f *~ *.o imagetest_6?09.txt imagelist.bin $(BINS)
 
 distclean: clean
 	rm -f imgtst.dsk $(TGTS)

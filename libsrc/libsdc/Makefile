@@ -1,5 +1,6 @@
 PREFIX=../..
 INCDIR=$(PREFIX)/asm_inc
+LIBDIR=$(PREFIX)/asm_libs
 LCLINC=sdc_dir.asm sdc_enable.asm sdc_img.asm sdc_lsec.asm	\
 	sdc_macros.asm sdc_str.asm
 ARCS=6309 6809
@@ -12,7 +13,7 @@ all: $(TGTS)
 	make -C 6309 libsdc.o
 
 6809/libsdc.o: libsdc.asm $(LCLINC)
-	make -C 6809 libsdc3.o
+	make -C 6809 libsdc.o
 
 test: $(DSKS)
 
