@@ -2,9 +2,9 @@ TGTS=lsn0 pbm2pm4
 
 all: $(TGTS)
 
-lsn0: lsn0.c
+lsn0: lsn0.o
 
-pbm2pm4: pbm2pm4.c
+pbm2pm4: pbm2pm4.o
 
 .PHONY: clean distclean
 
