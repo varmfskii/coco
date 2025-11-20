@@ -1,12 +1,12 @@
 iscoco3:
 	clr cocoflag
-	lda $ffb0
-	com $ffb0
-	cmpa $ffb0
+	lda PAL00
+	com PAL00
+	cmpa PAL00
 	bne coco12@
 	com cocoflag
 coco12@:
-	sta $ffb0
+	sta PAL00
 	rts
 
 	
