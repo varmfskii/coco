@@ -38,10 +38,10 @@ cont:
 noram:
 	andcc #$af		; disable interrupts
 	;; set text mode
-	lda $ff22
+	lda VDG
 	anda #$07
 	ora #$08
-	sta $ff22
+	sta VDG
 	;; set address to $0000
 	sta $ffc6		; $0200 off
 	sta $ffc8		; $0400 off

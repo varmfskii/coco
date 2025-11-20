@@ -1,5 +1,7 @@
+	include "../asm_inc/coco.asm"
+	include "../asm_inc/coco3.asm"
 space:	equ 96
-ramtop:	equ $0100
+ramsize:	equ $0100
 	org $c000
 start:	
 	andcc #$af

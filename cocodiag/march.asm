@@ -107,13 +107,13 @@ error:
 
 memtst:
 	ldx #$0200
-	ldy ramtop
+	ldy ramsize
 	bpl cont@
 	ldy #$8000
 cont@:
 	ldu #$0000
 	lbsr tst_blk
-	ldy ramtop
+	ldy ramsize
 	cmpy #$ff00
 	bne exit@
 	ldx #marstt
@@ -124,10 +124,10 @@ copy@:
 	cmpx #marend
 	bne copy@
 	fcb $16,$80,$00
-	sta $ffdf
+	sta RAMRAM
 	ldx #$8000
 	lbsr tst_blk
-	sta $ffde
+	sta RAMROM
 	fcb $16,$80,$00
 exit@:
 	rts
