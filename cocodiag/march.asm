@@ -107,14 +107,30 @@ error:
 
 memtst:
 	ldx #$0200
-	ldy ramsize
-	bpl cont@
+	lda ramsize
+	cmpa #_4k
+	bne _16kplus@
+	ldy #$1000
+	bra cont@
+_16kplus@:
+	cmpa #_16k
+	bne _32kplus@
+	ldy #$4000
+	bra cont@
+_32kplus@:
+	cmpa #_32k
+	bne _64kplus@
+	ldy #$8000
+	bra cont@
+_64kplus@:
+	cmpa #_64k
+	bne memtest_mmu
 	ldy #$8000
 cont@:
 	ldu #$0000
 	lbsr tst_blk
-	ldy ramsize
-	cmpy #$ff00
+	lda ramsize
+	cmpa #_64k
 	bne exit@
 	ldx #marstt
 copy@:
@@ -126,12 +142,24 @@ copy@:
 	fcb $16,$80,$00
 	sta RAMRAM
 	ldx #$8000
+	ldy #$ff00
 	lbsr tst_blk
 	sta RAMROM
 	fcb $16,$80,$00
 exit@:
 	rts
 
+memtest_mmu:
+	;; test rest of bank $38
+	ldx #$0200
+	ldy #$2000
+	lbsr tst_blk
+	lda #$38
+	sta MMU00
+	lda #%01000100
+	sta INIT0
+	rts
+	
 tst_blk:	
 	pshs y
 loop@:

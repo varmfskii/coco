@@ -1,5 +1,5 @@
 SYS=../asm_inc/coco.asm ../asm_inc/coco3.asm
-INC=setgfx.asm march.asm memsz.asm
+INC=setgfx.asm march.asm hardware.asm
 OBJS=foo.ccc
 
 build: ${OBJS}
