@@ -1,25 +1,11 @@
-	include "../asm_inc/coco.asm"
-	include "../asm_inc/coco3.asm"
-space equ 96
-ramsize equ $0100
-hwflag equ $0101
-coco3_f equ $01
-mmu_f equ $02
-_4k equ $00
-_16k equ $01
-_32k equ $02
-_64k equ $03
-_128k equ $04
-_256k equ $05
-_512k equ $06
-_1m equ $07
-_2m equ $08
-	
+	include "constants.asm"
 	org $c000
 start:	
 	andcc #$af
 	ldx #$1000
 	tfr x,s
+	clra
+	clrb
 	lbsr setgfx
 
 	ldx #$0000
@@ -53,17 +39,14 @@ loop@:
 	beq stayslow
  	sta FAST
 stayslow:	
-	lda #mmu_f
-	anda hwflag
-	bne endlp
-	lbsr memsz
 	lbsr memtst
 endlp:
 	inc $ff
 	bra endlp
-	include "setgfx.asm"
-	include "march.asm"
 	include "hardware.asm"
+	include "march.asm"
+	include "print.asm"
+	include "setgfx.asm"
 	
 fill:
 	rmb $e000-fill

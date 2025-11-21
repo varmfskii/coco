@@ -3,34 +3,29 @@ hardware:
 	sta hwflag
 	bsr iscoco3
 	bsr hasmmu
+	bsr has6309
 	lda #mmu_f
 	anda hwflag
 	lbne memsz_mmu
 	lbra memsz
 	
-	
 iscoco3:
-	ldy #$0120
 	lda PAL00
 	com PAL00
 	cmpa PAL00
 	beq coco12@
+	sta PAL00
 	lda hwflag
 	ora #coco3_f
 	sta hwflag
-	ldx #coco3
-	lbra write
-	sta PAL00
+	rts
 coco12@:
 	lda hwflag
 	anda #~coco3_f
 	sta hwflag
-	ldx #coco12
-	lbra write
-
+	rts
 
 hasmmu:
-	ldy #$128
 	lda MMU00
 	com MMU00
 	cmpa MMU00
@@ -39,15 +34,27 @@ hasmmu:
 	lda hwflag
 	ora #mmu_f
 	sta hwflag
-	ldx #mmu
-	lbra write
+	rts
 nommu@:
 	lda hwflag
 	anda #~mmu_f
 	sta hwflag
-	ldx #nommu
-	lbra write
+	rts
 
+has6309:
+	pshs d
+	fdb $1043
+	lda hwflag
+	cmpb 1,s
+	beq m6809@
+	ora #h6309_f
+	sta hwflag
+	puls d,pc
+	m6809@:
+	anda #~h6309_f
+	sta hwflag
+	puls d,pc
+	
 ;;;
 ;;; find memory size on coco 1/2 (no mmu)
 ;;;
@@ -61,13 +68,12 @@ nommu@:
 ;;; 64k = $0000-$feff
 ;;; 
 memsz:
-	ldy #$0130
 	clr $1000
 	lda $1000
-	bne mem4k
+	bne _4k@
 	clr $4000
 	lda $4000
-	bne mem16k
+	bne _16k@
 	;; copy routine into ram
 	ldx #chkstt
 loop@:
@@ -86,30 +92,25 @@ chkstt:
 	fcb $16,$80,$00
 chkend:	
 	lda $1000
-	bne mem32k
-mem64k:
+	bne _32k@
+_64k@:
 	lda #_64k
 	sta ramsize
-	ldx #ram64k
-	lbra write
-mem32k:
+	rts
+_32k@:
 	lda #_32k
 	sta ramsize
-	ldx #ram32k
-	lbra write
-mem16k:
+	rts
+_16k@:
 	lda #_16k
 	sta ramsize
-	ldx #ram16k
-	lbra write
-mem4k:
+	rts
+_4k@:
 	lda #_4k
 	sta ramsize
-	ldx #ram4k
-	lbra write
+	rts
 
 memsz_mmu:
-	ldy #$130
 	ldx #memsz_mmu
 copy@:
 	lda ,x
@@ -131,79 +132,101 @@ setmmu@:
 	clra
 bank@:
 	sta MMU02
-	sta $2000
+	sta $3fff
 	inca
 	bne bank@
 	clr MMU02
-	lda $2000
+	lda $3fff
 	sta RAMROM
 	ldb #$84
 	stb INIT0
 	fcb $16,$80,$00
 memsz_end:	
 	cmpa #$00
-	beq mem2m
+	beq _2M@
 	cmpa #$80
-	beq mem1m
+	beq _1M@
 	cmpa #$c0
-	beq mem512k
+	beq _512k@
 	cmpa #$e0
-	beq mem256k
+	beq _256k@
 	cmpa #$f0
-	beq mem128k
-	ldx #unknown
-	lbra write
-mem128k:
+	beq _128k@
+	lda #$ff
+	sta ramsize
+	rts
+_128k@:
 	lda #_128k
 	sta ramsize
-	ldx #ram128k
-	lbra write
-mem256k:
+	rts
+_256k@:
 	lda #_256k
 	sta ramsize
-	ldx #ram256k
-	lbra write
-mem512k:
+	rts
+_512k@:
 	lda #_512k
 	sta ramsize
-	ldx #ram512k
-	lbra write
-mem1m:
+	rts
+_1M@:
 	lda #_1m
 	sta ramsize
-	ldx #ram1M
-	lbra write
-mem2m:
+	rts
+_2M@:
 	lda #_2m
 	sta ramsize
-	ldx #ram2M
-	lbra write
-	
-mmu:	fcz "MMU"
-nommu:	fcz "NO`MMU"
-coco12:	fcz "COCO`qor"
-coco3:	fcz "COCO`s"
-ram4k:	fcz "tK`RAM"
-ram16k:	fcz "qvK`RAM"
-ram32k:	fcz "srK`RAM"
-ram64k:	fcz "vtK`RAM"
-ram128k:
-	fcz "qrxK`RAM"
-ram256k:
-	fcz "ruvK`RAM"
-ram512k:
-	fcz "uqrK`RAM"
-ram1M:
-	fcz "qM`RAM"
-ram2M:
-	fcz "rM`RAM"
-unknown:
-	fcz "UNKNOWN"
-	
-write:
-	lda ,x+
-	beq exit@
-	sta ,y+
-	bra write
-exit@:
 	rts
+
+showhw:
+	ldy #$02c2
+	lda #'m'
+	ldb #28
+loop@:
+	sta ,y+
+	decb
+	bne loop@
+	ldb hwflag
+	ldy #$0302
+	bitb #coco3_f
+	bne cc3@
+	ldx #coco12
+	bra c1@
+cc3@:
+	ldx #coco3
+c1@:
+	lbsr print_string
+	ldy #$0312
+	bitb #mmu_f
+	bne mmu@
+	ldx #nommu
+	bra c2@
+mmu@:
+	ldx #mmu
+c2@:
+	lbsr print_string
+	ldy #$0332
+	bitb #h6309_f
+	bne h6309@
+	ldx #m6809
+	bra c3@
+h6309@:
+	ldx #h6309
+c3@:
+	lbsr print_string
+	ldy #$0322
+	lda ramsize
+	asla
+	ldx #sizes
+	ldx a,x
+	lbsr print_string
+	rts
+sizes:
+	fdb ram4k
+	fdb ram16k
+	fdb ram32k
+	fdb ram64k
+	fdb ram128k
+	fdb ram256k
+	fdb ram512k
+	fdb ram1M
+	fdb ram2M
+

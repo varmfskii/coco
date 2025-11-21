@@ -154,10 +154,6 @@ memtest_mmu:
 	ldx #$0200
 	ldy #$2000
 	lbsr tst_blk
-	lda #$38
-	sta MMU00
-	lda #%01000100
-	sta INIT0
 	rts
 	
 tst_blk:	
