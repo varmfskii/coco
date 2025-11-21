@@ -104,17 +104,18 @@ error:
 	lda ,y
 	ora ,x
 	sta ,x
+	ora memerr
+	sta memerr
 	puls a,b,x,pc
 
 memtst:
-	ldx #$0200
+	ldx #$0400
 	lda ramsize
 	cmpa #_64k
 	bgt memtest_mmu
 	ldy #ramszs
 	lsla
 	ldy a,y
-	ldu #$0000
 	lbsr tst_blk
 	lda ramsize
 	cmpa #_64k
@@ -136,33 +137,33 @@ exit@:
 
 memtest_mmu:
 	;; test rest of bank $38
-	ldx #$0200
+	ldx #$0400
 	ldy #$2000
 	lbsr tst_blk
 	clra
-	ldy #$0000
+	ldy #$0200
 loop38@:
 	ora ,y+
-	cmpy #$0020
+	cmpy #$0220
 	bne loop38@
-	sta $0078
+	sta $0338
 	lda #$38
 	sta MMU00
 	lda #$30
 	sta MMU02
 	sta MMU04
-	lda #$f7
+	lda #$f4
 	sta INIT0
 	ldx #$2000
 	ldy #$4000
 	lbsr tst_blk
-	ldy #$0020
+	ldy #$0220
 	clra
 loop30@:
 	ora ,y+
-	cmpy #$0040
+	cmpy #$0240
 	bne loop30@
-	sta $0070
+	sta $0330
 	ldx #$c000
 copy@:
 	lda ,x
@@ -176,16 +177,16 @@ copy@:
 	ldd a,x
 	pshs d
 	std $0160
-	ldx #$20
-	lda #$ff
+	ldx #$220
+	lda #$c9
 loop2@:
 	sta ,x+
-	cmpx #$40
+	cmpx #$240
 	bne loop2@
 	toram
 	ldb ,s
 	lda #$a9
-	ldy #$0040
+	ldy #$0300
 loop@:
 	cmpb #$30
 	beq skip@
@@ -197,14 +198,14 @@ loop@:
 	stb ,s
 	lbsr tst_blk
 	clra
-	ldb #$ff
-	ldx #$20
+	ldb #$c9
+	ldx #$220
 loop3@:
 	ora ,x
 	stb ,x+
-	cmpx #$40
+	cmpx #$240
 	bne loop3@
-	ldx #$0040
+	ldx #$0300
 	ldb ,s
 	sta b,x
 skip@:

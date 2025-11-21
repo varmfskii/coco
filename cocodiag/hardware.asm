@@ -174,15 +174,19 @@ _2M@:
 	rts
 
 showhw:
-	ldy #$02c2
+	lbsr cls
+	ldx #hwtitle
+	ldy #$0206
+	lbsr print_string
+	ldy #$0241
 	lda #'m'
-	ldb #28
+	ldb #30
 loop@:
 	sta ,y+
 	decb
 	bne loop@
 	ldb hwflag
-	ldy #$0302
+	ldy #$0282
 	bitb #coco3_f
 	bne cc3@
 	ldx #coco12
@@ -191,7 +195,7 @@ cc3@:
 	ldx #coco3
 c1@:
 	lbsr print_string
-	ldy #$0312
+	ldy #$0292
 	bitb #mmu_f
 	bne mmu@
 	ldx #nommu
@@ -200,7 +204,7 @@ mmu@:
 	ldx #mmu
 c2@:
 	lbsr print_string
-	ldy #$0332
+	ldy #$02a2
 	bitb #h6309_f
 	bne h6309@
 	ldx #m6809
@@ -209,12 +213,13 @@ h6309@:
 	ldx #h6309
 c3@:
 	lbsr print_string
-	ldy #$0322
+	ldy #$02b2
 	lda ramsize
 	asla
 	ldx #sizes
 	ldx a,x
 	lbsr print_string
+	lbsr anykey
 	rts
 sizes:
 	fdb ram4k

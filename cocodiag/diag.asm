@@ -6,7 +6,8 @@ start:
 	tfr x,s
 	lda #$02
 	lbsr setgfx
-	
+	lbsr cls
+
 	lda #'*'
 	ldy #$0200
 loop@:
@@ -15,13 +16,6 @@ loop@:
 	cmpy #$0220
 	bne loop@
 
-	lda #96
-loop@:
-	sta ,y+
-	cmpy #$03e0
-	bne loop@
-
-	lda #'*'
 	ldy #$0220
 loop@:
 	sta ,y
@@ -30,14 +24,15 @@ loop@:
 	cmpy #$03e0
 	bne loop@
 
-	ldx #title1
-	ldy #$249
+	ldx #title
+	ldy #$2a9
 	lbsr print_string
-	ldx #title2
-	ldy #$268
+	ldy #$2c8
 	lbsr print_string
-	ldx #title3
-	ldy #$285
+	ldx #version
+	ldy #$38a
+	lbsr print_string
+	ldy #$3a5
 	lbsr print_string
 
 	ldu #$0400
@@ -54,7 +49,9 @@ loop@:
 	ldx #$0200
 	tfr x,s
 	lbsr hardware
-	lbsr showhw
+	lbsr anykey
+	lbra menu
+	;; lbsr showhw
 	;; clra
 	;; lbsr setgfx
 endlp:
@@ -88,15 +85,14 @@ page1err:
 	lbsr print_string
 	bra blink
 	
-title1:	fcz "COLOR`COMPUTER"
-title2:	fcz "DIAGNOSTICS`CART"
-title3:	fcz "hCi`rpru`ZIA`COMPUTING"
-page0:	fcz "PAGE`p`ERROR"
-page1:	fcz "PAGE`q`ERROR"
-blank:	fcz "````````````"
-
+anykey:
+	jsr [POLCAT]
+	beq anykey
+	rts
+	
 	include "hardware.asm"
  	include "march.asm"
+	include "menu.asm"
 	include "print.asm"
 	include "setgfx.asm"
 fill:

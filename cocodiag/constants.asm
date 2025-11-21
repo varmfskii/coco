@@ -1,3 +1,4 @@
+	include "../asm_inc/ecb.asm"
 	include "../asm_inc/coco.asm"
 	include "../asm_inc/coco3.asm"
 toram	macro
@@ -10,10 +11,11 @@ torom	macro
 	fcb $16,$80,$00
 	endm
 	
-space equ 96
+scr_space equ space+$40
 ;;; locations
 ramsize equ $0140
 hwflag equ $0141
+memerr equ $0142	
 ;;; hardware flags
 coco3_f equ $01
 mmu_f equ $02

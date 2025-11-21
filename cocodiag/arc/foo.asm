@@ -9,7 +9,7 @@ start:
 	lbsr setgfx
 
 	ldx #$0000
-	lda #space
+	lda #scr_space
 loop@:
 	sta ,x+
 	cmpx #$0200
@@ -25,7 +25,7 @@ loop@:
 	lbsr tst_page
 
 	ldx #$0002
-	lda #space
+	lda #scr_space
 loop@:
 	sta ,x+
 	cmpx #$0200
