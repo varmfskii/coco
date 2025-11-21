@@ -1,9 +1,19 @@
 	include "../asm_inc/coco.asm"
 	include "../asm_inc/coco3.asm"
+toram	macro
+	fcb $16,$80,$00
+	sta RAMRAM
+	endm
+
+torom	macro
+	sta RAMROM
+	fcb $16,$80,$00
+	endm
+	
 space equ 96
 ;;; locations
-ramsize equ $0100
-hwflag equ $0101
+ramsize equ $0140
+hwflag equ $0141
 ;;; hardware flags
 coco3_f equ $01
 mmu_f equ $02

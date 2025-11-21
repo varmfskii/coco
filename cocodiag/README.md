@@ -8,8 +8,6 @@ TODO
 
 - Memory
 
-  - MMU memory test
-
 - video tests
 
 - keyboard tests

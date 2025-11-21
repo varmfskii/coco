@@ -17,6 +17,7 @@ tst_tbl:
 	fcb $80,$40,$20,$10,$08,$04,$02,$01
 	;; fcb $00,$FF,$A5,$5A 
 tst_tbl_end:
+ramszs:	fdb $1000,$4000,$8000,$8000,$3040,$2040,$0040,$0080,$0000
 tst_page:
 	pshs x
 	tfr u,x
@@ -108,25 +109,11 @@ error:
 memtst:
 	ldx #$0200
 	lda ramsize
-	cmpa #_4k
-	bne _16kplus@
-	ldy #$1000
-	bra cont@
-_16kplus@:
-	cmpa #_16k
-	bne _32kplus@
-	ldy #$4000
-	bra cont@
-_32kplus@:
-	cmpa #_32k
-	bne _64kplus@
-	ldy #$8000
-	bra cont@
-_64kplus@:
 	cmpa #_64k
-	bne memtest_mmu
-	ldy #$8000
-cont@:
+	bgt memtest_mmu
+	ldy #ramszs
+	lsla
+	ldy a,y
 	ldu #$0000
 	lbsr tst_blk
 	lda ramsize
@@ -139,13 +126,11 @@ copy@:
 	leax 1,x
 	cmpx #marend
 	bne copy@
-	fcb $16,$80,$00
-	sta RAMRAM
+	toram
 	ldx #$8000
 	ldy #$ff00
 	lbsr tst_blk
-	sta RAMROM
-	fcb $16,$80,$00
+	torom
 exit@:
 	rts
 
@@ -154,6 +139,80 @@ memtest_mmu:
 	ldx #$0200
 	ldy #$2000
 	lbsr tst_blk
+	clra
+	ldy #$0000
+loop38@:
+	ora ,y+
+	cmpy #$0020
+	bne loop38@
+	sta $0078
+	lda #$38
+	sta MMU00
+	lda #$30
+	sta MMU02
+	sta MMU04
+	lda #$f7
+	sta INIT0
+	ldx #$2000
+	ldy #$4000
+	lbsr tst_blk
+	ldy #$0020
+	clra
+loop30@:
+	ora ,y+
+	cmpy #$0040
+	bne loop30@
+	sta $0070
+	ldx #$c000
+copy@:
+	lda ,x
+	sta $8000,x
+	leax 1,x
+	cmpx #$e000
+	bne copy@
+	ldx #ramszs
+	lda ramsize
+	lsla
+	ldd a,x
+	pshs d
+	std $0160
+	ldx #$20
+	lda #$ff
+loop2@:
+	sta ,x+
+	cmpx #$40
+	bne loop2@
+	toram
+	ldb ,s
+	lda #$a9
+	ldy #$0040
+loop@:
+	cmpb #$30
+	beq skip@
+	cmpb #$38
+	beq skip@
+	ldx #$2000
+	ldy #$4000
+	stb MMU02
+	stb ,s
+	lbsr tst_blk
+	clra
+	ldb #$ff
+	ldx #$20
+loop3@:
+	ora ,x
+	stb ,x+
+	cmpx #$40
+	bne loop3@
+	ldx #$0040
+	ldb ,s
+	sta b,x
+skip@:
+	incb
+	cmpb 1,s
+	bne loop@
+	torom
+	puls d
 	rts
 	
 tst_blk:	

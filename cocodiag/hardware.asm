@@ -83,13 +83,11 @@ loop@:
 	cmpx #chkend
 	bne loop@
 chkstt:	
-	fcb $16,$80,$00
-	sta RAMRAM		; put in all ram mode
+	toram
 	clr $1000
 	clr $9000
 	com $9000
-	sta RAMROM		; back in rom/ram mode
-	fcb $16,$80,$00
+	torom
 chkend:	
 	lda $1000
 	bne _32k@
@@ -125,8 +123,7 @@ setmmu@:
 	inca
 	cmpa #$40
 	bne setmmu@
-	fcb $16,$80,$00
-	sta RAMRAM
+	toram
 	lda #$f4
 	sta INIT0
 	clra
