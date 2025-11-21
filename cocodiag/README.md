@@ -1,12 +1,8 @@
 TODO
 
-- Menu
-
 - Hardware
   
   - Detect other external hardware where possible
-
-- Memory
 
 - video tests
 
