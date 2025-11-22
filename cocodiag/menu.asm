@@ -78,12 +78,12 @@ loop@:
 	lda memerr
 	bne memerr@
 	ldx #memgood
-	ldy #$0200
+	ldy #$0247
 	lbsr print_string
 	lbra anykey
 memerr@:
 	ldx #membad
-	ldy #$0200
+	ldy #$0247
 	lbsr print_string
 	lbra anykey
 

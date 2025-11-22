@@ -65,6 +65,7 @@ page0err:
 
 	
 blink:
+	sta SLOW
 	ldy #$3aa
 	ldb #12
 loop@:
