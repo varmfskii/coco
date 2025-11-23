@@ -78,12 +78,18 @@ has6309:
 ;;; 64k = $0000-$feff
 ;;; 
 memsz:
-	clr $1000
-	lda $1000
-	bne _4k@
-	clr $4000
-	lda $4000
-	bne _16k@
+	ldx #$1000
+	lda ,x
+	neg ,x
+	cmpa ,x
+	beq _4k@
+	sta ,x
+	ldx #$4000
+	lda ,x
+	neg ,x
+	cmpa ,x
+	beq _16k@
+	sta ,x
 	;; copy routine into ram
 	ldx #chkstt
 loop@:
