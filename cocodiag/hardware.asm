@@ -1,31 +1,39 @@
 hardware:
 	lda #$f0
 	sta hwflag
-	bsr iscoco3
+	bsr machine_type
 	bsr hasmmu
 	bsr has6309
 	lda #mmu_f
 	anda hwflag
 	lbne memsz_mmu
 	lbra memsz
-	
-iscoco3:
-	lda PAL00
-	com PAL00
-	cmpa PAL00
-	beq coco12@
-	sta PAL00
+
+machine_type:
 	lda hwflag
+	ldb $a000
+	cmpb #$80
+	beq dragon@
+	anda #~dragon_f
+	ldb PAL00
+	com PAL00
+	cmpb PAL00
+	beq coco12@
+	stb PAL00
 	ora #coco3_f
 	sta hwflag
 	sta FAST
 	rts
 coco12@:
-	lda hwflag
 	anda #~coco3_f
 	sta hwflag
 	rts
-
+dragon@:
+	ora #dragon_f
+	anda #~coco3_f
+	sta hwflag
+	rts
+	
 hasmmu:
 	lda MMU00
 	com MMU00
@@ -189,6 +197,11 @@ loop@:
 	bne loop@
 	ldb hwflag
 	ldy #$0282
+	bitb #dragon_f
+	beq coco@
+	ldx #dragon
+	bra c1@
+coco@:
 	bitb #coco3_f
 	bne cc3@
 	ldx #coco12

@@ -20,6 +20,8 @@ memerr equ $0142
 coco3_f equ $01
 mmu_f equ $02
 h6309_f equ $04
+dragon_f equ $08
+pal_f equ $10
 ;;; memory sizes
 _4k equ $00
 _16k equ $01

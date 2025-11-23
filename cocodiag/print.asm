@@ -75,6 +75,7 @@ mmu:	fcz "MMU"
 nommu:	fcz "NO MMU"
 coco12:	fcz "COCO 1/2"
 coco3:	fcz "COCO 3"
+dragon:	fcz "DRAGON"
 ram4k:	fcz "4K RAM"
 ram16k:	fcz "16K RAM"
 ram32k:	fcz "32K RAM"
@@ -91,6 +92,8 @@ unknown:
 	fcz "UNKNOWN"
 h6309:	fcz "CPU H6309"
 m6809:	fcz "CPU M6809"
+pal:	fcz "50HZ"
+ntsc:	fcz "60HZ"
 memgood:
 	fcz "MEMORY TEST PASSED"
 membad:
