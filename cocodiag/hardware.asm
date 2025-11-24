@@ -2,13 +2,18 @@ hardware:
 	lda #$f0
 	sta hwflag
 	bsr machine_type
+	bsr ispal
 	bsr hasmmu
-	bsr has6309
+	lbsr has6309
 	lda #mmu_f
 	anda hwflag
 	lbne memsz_mmu
 	lbra memsz
 
+;;;
+;;; determine if system is a dragon or color computer (check rom)
+;;; if it is a coco check if it is a coco3
+;;; 
 machine_type:
 	lda hwflag
 	ldb $a000
@@ -33,7 +38,42 @@ dragon@:
 	anda #~coco3_f
 	sta hwflag
 	rts
+
+;;; 
+;;; determine whether system is 50 or 60 Hz
+;;; 
+ispal:	
+	;; enable vsync flag
+	lda $ff03
+	ora #$01
+	sta $ff03
+	;; wait for vsync
+	lda $ff02
+loop1@:
+	lda $ff03
+	bpl loop1@
+	;; count cycles between vsyncs
+	lda $ff02
+	ldy #$0000
+loop2@:
+	leay 1,y
+	lda $ff03
+	bpl loop2@
+	lda hwflag
+	;; more cycles for pal (50Hz) fewer for ntsc (60Hz)
+	cmpy #$0500
+	bgt pal@
+	anda #~pal_f
+	sta hwflag
+	rts
+pal@:
+	ora #pal_f
+	sta hwflag
+	rts
 	
+;;;
+;;; determine if system has a GIME style MMU
+;;; 
 hasmmu:
 	lda MMU00
 	com MMU00
@@ -124,6 +164,11 @@ _4k@:
 	sta ramsize
 	rts
 
+;;;
+;;; check the memory size (up to 2Mb) on a system with an MMU
+;;;
+;;; unused pages are mirrors of used pages.
+;;; 
 memsz_mmu:
 	ldx #memsz_mmu
 copy@:
@@ -189,6 +234,9 @@ _2M@:
 	sta ramsize
 	rts
 
+;;;
+;;; show the detected hardware configuration
+;;; 
 showhw:
 	lbsr cls
 	ldx #hwtitle
@@ -240,6 +288,15 @@ c3@:
 	ldx #sizes
 	ldx a,x
 	lbsr print_string
+	ldy #$02c2
+	bitb #pal_f
+	bne pal@
+	ldx #ntsc
+	bra c4@
+pal@:
+	ldx #pal
+c4@:
+	lbsr print_string
 	lbsr anykey
 	rts
 sizes:
@@ -252,4 +309,3 @@ sizes:
 	fdb ram512k
 	fdb ram1M
 	fdb ram2M
-
